@@ -153,6 +153,7 @@ function handle(id,o){o=o||{};
  if(id=="ssnap")return fire("ssnapped",{slot:o.slot|0,k:o.k,pos:nextAttack(o.slot|0,+o.from)});
  if(id=="psave")return presetSave(o);if(id=="plist")return presetList(o.kind);if(id=="pload")return presetLoad(o);
  if(id=="pdel"){api("/api/del?kind="+encodeURIComponent(o.kind)+"&name="+encodeURIComponent(o.name),{method:"POST"}).finally(()=>presetList(o.kind));return}
+ if(id=="mload"){const i=document.createElement("input");i.type="file";i.accept=".mid,.midi,audio/midi,audio/x-midi";i.onchange=async()=>{const f=i.files&&i.files[0];if(!f)return;let s="";const u=new Uint8Array(await f.arrayBuffer());for(let k=0;k<u.length;k+=32768)s+=String.fromCharCode.apply(null,u.subarray(k,k+32768));fire("mdata",{name:f.name.replace(/\.midi?$/i,""),b64:btoa(s)})};i.click();return}
  if(id=="pexport")return exportSong(o.name);if(id=="pimport")return importSong();
  if(id=="fs"){try{o.on?document.documentElement.requestFullscreen():document.exitFullscreen()}catch(_){}return}
 }
@@ -908,7 +909,7 @@ try{window.__JUCE__.backend.addEventListener("sinfo",o=>{if(o.err){toast("FICHIE
 // drag & drop of audio files (Ableton browser, Finder): on the SYNTH page = the open slot; on a track name = that track's instrument
 addEventListener("dragover",e=>{e.preventDefault();if(e.dataTransfer)e.dataTransfer.dropEffect="copy";const t=dropTarget(e);document.body.classList.toggle("dropok",t!=null)});
 addEventListener("dragleave",e=>{if(e.target===document.documentElement||!e.relatedTarget)document.body.classList.remove("dropok")});
-addEventListener("drop",e=>{e.preventDefault();document.body.classList.remove("dropok");const slot=dropTarget(e);if(slot==null)return toast("LÂCHE LE SAMPLE SUR LA PAGE SYNTH OU SUR LE NOM D'UNE PISTE");dropSample(e.dataTransfer,slot)});
+addEventListener("drop",e=>{e.preventDefault();document.body.classList.remove("dropok");if(midiDrop(e.dataTransfer))return;const slot=dropTarget(e);if(slot==null)return toast("LÂCHE LE SAMPLE SUR LA PAGE SYNTH OU SUR LE NOM D'UNE PISTE");dropSample(e.dataTransfer,slot)});
 function dropTarget(e){const th=e.target&&e.target.closest&&e.target.closest(".thd");if(th){const l=[...document.querySelectorAll(".thd")].indexOf(th),tr=U.bank*4+l,inf=trackInfo(tr);return inf?inf.ins:DEFI[tr]}return U.view=="synth"?U.ins:null}
 async function dropSample(dt,slot){const I=S.ins[slot];
  const ready=()=>{if(I.wave!="sample"){I.wave="sample";I.smode=I.smode|0;I.slices=I.slices||8;save()}if(U.view=="synth"&&U.ins===slot)buildIns()};
@@ -1343,6 +1344,42 @@ function kpUpdate(){const kp=$("#kpad");if(!kp)return;kp.hidden=U.view!="phrase"
  else{pad.appendChild(B("● ON / OFF",()=>kpKey("Enter"),"drum"))}}
 if(window.MK2PHONE){const kp=document.createElement("div");kp.id="kpad";kp.className="kpad";kp.innerHTML='<div id="kpNav" class="kpnav"></div><div id="kpPad"></div>';document.body.appendChild(kp);
  const v0=view;view=function(v){v0(v);kpLast="";kpUpdate()};setTimeout(()=>{kpLast="";kpUpdate()},300)}
+
+// ---------- MIDI import: a .mid becomes tracker rows (1 row = 1/16), one MIDI part per track, GM drums on the 5 lanes
+function midiParse(b){const u=new Uint8Array(b);let p=0;const str=n=>{let s="";for(let i=0;i<n;i++)s+=String.fromCharCode(u[p++]);return s},u32=()=>{const v=(u[p]<<24|u[p+1]<<16|u[p+2]<<8|u[p+3])>>>0;p+=4;return v},u16=()=>{const v=u[p]<<8|u[p+1];p+=2;return v};
+ const vlq=()=>{let v=0,c;do{c=u[p++];v=(v<<7)|(c&127)}while(c&128&&p<u.length);return v};
+ if(str(4)!=="MThd")throw new Error("pas un MIDI");const hl=u32(),fmt=u16(),nt=u16(),div=u16();p+=hl-6;if(div&0x8000)throw new Error("SMPTE");
+ const notes=[];let tempo=0;
+ for(let t=0;t<nt&&p<u.length;t++){if(str(4)!=="MTrk")break;const len=u32(),end=p+len;let tick=0,run=0,name="";const on={};
+  while(p<end){tick+=vlq();let st=u[p];if(st&128){p++;run=st}else st=run;const ty=st>>4,ch=st&15;
+   if(st===0xFF){const m=u[p++],l=vlq();if(m===0x51&&!tempo)tempo=60000000/((u[p]<<16)|(u[p+1]<<8)|u[p+2]);if(m===3)name=String.fromCharCode(...u.subarray(p,p+l));p+=l}
+   else if(st===0xF0||st===0xF7){p+=vlq()}
+   else if(ty===9||ty===8){const n=u[p++],v=u[p++],k=ch*128+n;if(ty===9&&v>0){on[k]=on[k]||[];on[k].push({t0:tick,n,v,ch,trk:t,name})}else if(on[k]&&on[k].length){const x=on[k].shift();x.t1=tick;notes.push(x)}}
+   else if(ty===0xC||ty===0xD)p+=1;else p+=2}
+  Object.values(on).forEach(a=>a.forEach(x=>{x.t1=x.t0+div/4;notes.push(x)}));p=end}
+ return{div,notes,bpm:tempo?Math.round(tempo):0}}
+function midiImport(buf,name){let M;try{M=midiParse(buf)}catch(e){return toast("MIDI ILLISIBLE")}
+ const rt=M.div/4,row=t=>Math.round(t/rt),last=M.notes.reduce((m,x)=>Math.max(m,row(x.t0)),0),nph=Math.min(16-U.ph,Math.floor(last/16)+1);
+ if(!M.notes.length)return toast("PAS DE NOTES DANS CE MIDI");
+ const groups={};M.notes.forEach(x=>{const k=x.ch===9?"drums":x.trk+":"+x.ch;(groups[k]=groups[k]||[]).push(x)});
+ const mel=Object.keys(groups).filter(k=>k!=="drums").sort((a,b)=>groups[b].length-groups[a].length).slice(0,NT).sort((a,b)=>{const[x1,c1]=a.split(":").map(Number),[x2,c2]=b.split(":").map(Number);return x1-x2||c1-c2});
+ for(let q=0;q<nph;q++){snapUndo("IMPORT MIDI",U.ph+q);S.ph[U.ph+q]=Array.from({length:16},RE)}
+ const at=r=>{const q=Math.floor(r/16);return q<nph?S.ph[U.ph+q][r%16]:null};
+ mel.forEach((k,tr)=>{const g=groups[k],avg=g.reduce((s,x)=>s+x.n,0)/g.length,byRow={};
+  g.forEach(x=>{const r=row(x.t0),c=byRow[r];if(!c||(avg<48?x.n<c.n:x.n>c.n))byRow[r]=x});
+  const rows=Object.keys(byRow).map(Number).sort((a,b)=>a-b);
+  rows.forEach((r,j)=>{const R=at(r);if(!R)return;const x=byRow[r];R.t[tr]={n:x.n,i:U.lastI[tr],v:Math.max(1,Math.round(x.v/127*15)),c:"",x:0};
+   const e=Math.max(r+1,row(x.t1)),nx=j+1<rows.length?rows[j+1]:1e9;if(e<nx){const E=at(e);if(E&&E.t[tr].n===-1)E.t[tr].n=-2}})});
+ if(groups.drums)groups.drums.forEach(x=>{const R=at(row(x.t0));if(!R)return;const n=x.n;const k=n===35||n===36?"k":[37,38,39,40].includes(n)?"s":[42,44,51,53,59].includes(n)?"h":n===46?"o":"p";R[k]=1});
+ for(let q=0;q<16;q++)S.chain[q]=q<nph?U.ph+q:-1;if(M.bpm>=40&&M.bpm<=300){S.bpm=M.bpm;$("#bpm").value=S.bpm}
+ const wasSc=S.scale;S.scale=-1;mode=nph>1?"chain":"phrase";paintMode();paintScale();view("phrase");paint();save();sendUi();
+ toast("MIDI "+(name||"")+" : "+mel.length+" PISTE"+(mel.length>1?"S":"")+(groups.drums?" + DRUMS":"")+" · "+nph+" PHRASE"+(nph>1?"S":"")+(wasSc>=0?" · GAMME → LIBRE":""))}
+function midiDrop(dt){if(!dt)return false;const f=dt.files&&dt.files[0];const uri=(dt.getData("text/uri-list")||dt.getData("text/plain")||"").split("\n").map(x=>x.trim()).find(x=>/\.midi?$/i.test(x));
+ if(f&&/\.midi?$/i.test(f.name)){f.arrayBuffer().then(b=>midiImport(b,f.name.replace(/\.midi?$/i,""))).catch(()=>uri&&send("mpath",{path:uri}));return true}
+ if(uri){send("mpath",{path:uri});return true}return false}
+try{window.__JUCE__.backend.addEventListener("mdata",o=>{const s=atob(o.b64),b=new Uint8Array(s.length);for(let i=0;i<s.length;i++)b[i]=s.charCodeAt(i);midiImport(b.buffer,o.name)})}catch(_){}
+{const row=document.createElement("div");row.className="phrow";row.style.marginTop="8px";const b=document.createElement("button");b.type="button";b.className="chip";b.textContent="IMPORTER UN MIDI";b.title="Un fichier .mid devient des phrases (à partir de la phrase affichée) : une partie MIDI par piste, drums GM sur les 5 couloirs. Tu peux aussi glisser le .mid sur le plugin";b.onclick=()=>send("mload",{});
+ const h=document.createElement("span");h.className="hint";h.textContent="ou glisse un .mid sur le plugin · à partir de la phrase affichée";row.append(b,h);$("#songFiles").before(row)}
 })();
 
 </script>
