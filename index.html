@@ -183,6 +183,25 @@ html.phone .hint{font-size:11px}
 html.phone .pop .keys button{min-height:64px}
 html.phone #osd canvas{width:288px;height:84px}
 html.phone header .logo{flex:1 1 100%;flex-direction:row;align-items:baseline;gap:10px}html.phone .logo small{display:none}
+
+/* the phone keypad, docked at the bottom while the tracker is shown */
+html.phone body{padding-bottom:250px}
+.kpad{position:fixed;left:0;right:0;bottom:0;z-index:70;background:#05070d;border-top:2px solid var(--acc);padding:6px 6px calc(6px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:6px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.kpad[hidden]{display:none}
+.kpad .kb{border:1px solid var(--line);background:linear-gradient(180deg,#16203a,#0c1428);color:var(--ink);font-family:var(--mono);font-size:14px;border-radius:6px;min-height:42px;padding:0;box-shadow:0 2px 0 #000}
+.kpad .kb.dn{transform:translateY(2px);box-shadow:none;background:var(--acc);color:var(--accInk)}
+.kpnav{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}.kpnav .del{color:#ff6b6b}
+.kpoct{display:grid;grid-template-columns:1fr auto 1fr 1fr 1.6fr;gap:5px;align-items:center;margin-bottom:5px}.kpoct span{font-family:var(--mono);font-size:12px;color:var(--acc);padding:0 4px}.kpoct .off{color:#ff9f43}
+.kpiano{position:relative;height:118px;display:flex}
+.kpiano .wh{flex:1;height:118px;margin:0 1px;background:linear-gradient(180deg,#e9eef7,#c9d3e3);color:#0b1020;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px!important;font-size:11px;font-weight:700}
+.kpiano .wh.out{background:linear-gradient(180deg,#9aa6ba,#7c879b)}
+.kpiano .bk{position:absolute;top:0;width:8%;height:70px;z-index:2;background:linear-gradient(180deg,#1b1f2b,#05070d);border-color:#000}
+.kpiano .bk.out{background:linear-gradient(180deg,#3a4152,#222836)}
+.kpiano .kb.dn{background:var(--acc)}
+.kpad-v,.kpad-x{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}.kpad-v .kb,.kpad-x .kb{min-height:52px;font-size:18px;font-weight:700}
+.kpad-i{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}.kpad-i .kb{font-size:12px;text-align:left;padding:0 10px}
+.kpad-c{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.kpad-c .kb{color:var(--acc2);font-weight:700}
+.kpad-d{display:grid}.kpad-d .kb{min-height:70px;font-size:18px}
 </style>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#070B18"><meta name="mobile-web-app-capable" content="yes">
@@ -692,7 +711,7 @@ function paint(){const ph=S.ph[U.ph];$("#phTitle").textContent="Phrase "+hx(U.ph
    rc[b+4].textContent=d.c?hx(d.x,2):"--";rc[b+4].classList.toggle("e",!d.c)}
   [["k",21,"d1"],["s",22,"d2"],["h",23,"d3"],["o",24,"d4"],["p",25,"d5"]].forEach(([k,c,cl])=>{rc[c].innerHTML='<span class="dot"></span>';rc[c].classList.toggle(cl,!!R[k]);rc[c].setAttribute("aria-label",k.toUpperCase()+(R[k]?" on":" off"))})}
  paintHead();paintSel();save()}
-function paintSel(){$$(".c.sel").forEach(e=>e.classList.remove("sel"));$$(".c.bs").forEach(e=>e.classList.remove("bs"));if(U.sa&&cells.length){const b=blkRect();for(let r=b.r0;r<=b.r1;r++)for(let c=b.c0;c<=b.c1;c++)cells[r].rc[c].classList.add("bs")}const c=cells[U.row]&&cells[U.row].rc[U.col];if(c)c.classList.add("sel");
+function paintSel(){if(window.MK2PHONE)setTimeout(kpUpdate,0);$$(".c.sel").forEach(e=>e.classList.remove("sel"));$$(".c.bs").forEach(e=>e.classList.remove("bs"));if(U.sa&&cells.length){const b=blkRect();for(let r=b.r0;r<=b.r1;r++)for(let c=b.c0;c<=b.c1;c++)cells[r].rc[c].classList.add("bs")}const c=cells[U.row]&&cells[U.row].rc[U.col];if(c)c.classList.add("sel");
  const tr=colT(U.col);$("#octLbl").textContent="OCT "+U.oct+(tr>=0?" · T"+(tr+1):" · DRUMS");$$(".tname").forEach((b,i)=>b.classList.toggle("cur",i===tr-U.bank*4));if(tr>=0&&tr!==paintSel.lt){paintSel.lt=tr;sendUi()}}
 let lastPlayRow=-1;
 let lastHitKey="";
@@ -706,7 +725,7 @@ function paintPlay(){hitTracks();const g=P.ghostRow>=0&&P.ghostPh===U.ph?P.ghost
 
 function sel(r,c){U.row=(r+16)%16;U.col=Math.max(1,Math.min(NC-1,c));paintSel();const el=cells[U.row].rc[U.col];if(el&&el.scrollIntoView)el.scrollIntoView({block:"nearest",inline:"nearest"})}
 const cellD=(r,c)=>S.ph[U.ph][r].t[colT(c)];
-function cellClick(r,c){if(blkSkip){blkSkip=false;return}if(U.sa){U.sa=null}const again=U.row===r&&U.col===c;sel(r,c);grid.focus({preventScroll:true});
+function cellClick(r,c){if(blkSkip){blkSkip=false;return}if(U.sa){U.sa=null}if(window.MK2PHONE&&c<21){sel(r,c);return}const again=U.row===r&&U.col===c;sel(r,c);grid.focus({preventScroll:true});
  if(c<=20&&colF(c)==1&&again){const d=cellD(r,c);openSynth(d.n>=0?d.i:U.lastI[colT(c)],colT(c));return}
  if(c>=21){const R=S.ph[U.ph][r],k=DK[c-21];R[k]=R[k]?0:1;if(R[k])send("hit",{l:c-21});paint();return}
  const d=cellD(r,c),f=colF(c);if(f==0&&(again||d.n===-1))notePopup(r,c);else if(f==3&&(again||!d.c))cmdPopup(r,c)}
@@ -1273,6 +1292,28 @@ if(window.MK2PHONE){$("#phbox").hidden=true;document.documentElement.classList.a
  const ex=document.createElement("button");ex.type="button";ex.className="chip";ex.textContent="EXPORTER LE MORCEAU";ex.onclick=()=>send("pexport",{name:$("#songName").value});
  const im=document.createElement("button");im.type="button";im.className="chip";im.textContent=window.MK2SRV?"IMPORTER → MAC":"IMPORTER UN MORCEAU";im.onclick=()=>send("pimport",{});
  const row=document.createElement("div");row.className="phrow";row.append(ex,im);box.append(h,row);$("#songFiles").before(box)}
+
+// ---------- phone keypad: a fake keyboard under the tracker, it changes with the column (piano / hex / commands)
+const KBI={};Object.entries(KB).forEach(([k,v])=>{if(!(v in KBI)&&k!=","&&k!="q")KBI[v]=k});KBI[12]="q";
+const kpKey=(key)=>onKey({key,shiftKey:false,target:document.body,preventDefault(){}});
+let kpLast="";
+function kpUpdate(){const kp=$("#kpad");if(!kp)return;kp.hidden=U.view!="phrase";if(kp.hidden)return;
+ const c=U.col,f=c>=21?"d":["n","i","v","c","x"][colF(c)],key=f+":"+U.oct+":"+(f=="n"?"":"");if(key===kpLast)return;kpLast=key;
+ const B=(t,fn,cls,al)=>{const b=document.createElement("button");b.type="button";b.className="kb "+(cls||"");b.textContent=t;if(al)b.setAttribute("aria-label",al);
+  b.addEventListener("pointerdown",e=>{e.preventDefault();fn();b.classList.add("dn");setTimeout(()=>b.classList.remove("dn"),120)});return b};
+ const nav=$("#kpNav"),pad=$("#kpPad");nav.innerHTML="";pad.innerHTML="";pad.className="kpad-"+f;
+ nav.append(B("◀",()=>kpKey("ArrowLeft"),"",'Colonne précédente'),B("▲",()=>kpKey("ArrowUp"),"",'Ligne au-dessus'),B("▼",()=>kpKey("ArrowDown"),"",'Ligne en dessous'),B("▶",()=>kpKey("ArrowRight"),"",'Colonne suivante'),
+  B("⇥",()=>kpKey("Tab"),"","Piste suivante"),B("⌫",()=>kpKey("Delete"),"del","Effacer"));
+ if(f=="n"){const oc=document.createElement("div");oc.className="kpoct";oc.append(B("OCT −",()=>{U.oct=Math.max(0,U.oct-1);kpLast="";paintSel()}),Object.assign(document.createElement("span"),{textContent:"OCT "+U.oct}),B("OCT +",()=>{U.oct=Math.min(7,U.oct+1);kpLast="";paintSel()}),B("OFF",()=>kpKey("1"),"off","Note off"),B("↵ DERNIÈRE",()=>kpKey("Enter"),"","Répète la dernière note"));pad.appendChild(oc);
+  const pi=document.createElement("div");pi.className="kpiano";let w=0;
+  for(let n=0;n<=12;n++){const bk=[1,3,6,8,10].includes(n%12),m=(U.oct+1)*12+n,b=B(bk?"":nName(m).replace("-",""),()=>kpKey(KBI[n]),bk?"bk":"wh",nName(m));
+   if(bk)b.style.left="calc("+(w*100/8)+"% - "+(100/8*.32)+"%)";else w++;if(!inScale(m))b.classList.add("out");pi.appendChild(b)}pad.appendChild(pi)}
+ else if(f=="i"){for(let k=0;k<8;k++)pad.appendChild(B(hx(k,2)+" "+(S.ins[k].name||"").slice(0,8),()=>kpKey(String(k)),"ins"))}
+ else if(f=="v"||f=="x"){for(let k=0;k<16;k++){const h=k.toString(16);pad.appendChild(B(h.toUpperCase(),()=>kpKey(h),"hex"))}}
+ else if(f=="c"){Object.entries(CK).forEach(([k,cm])=>pad.appendChild(B(cm,()=>kpKey(k),"cmd")));pad.appendChild(B("---",()=>kpKey("Delete"),"cmd"))}
+ else{pad.appendChild(B("● ON / OFF",()=>kpKey("Enter"),"drum"))}}
+if(window.MK2PHONE){const kp=document.createElement("div");kp.id="kpad";kp.className="kpad";kp.innerHTML='<div id="kpNav" class="kpnav"></div><div id="kpPad"></div>';document.body.appendChild(kp);
+ const v0=view;view=function(v){v0(v);kpLast="";kpUpdate()};setTimeout(()=>{kpLast="";kpUpdate()},300)}
 })();
 
 </script>
