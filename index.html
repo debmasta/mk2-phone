@@ -1053,7 +1053,7 @@ function mutate(){const lvl=+$("#mutLvl").value,pr=[0,.12,.22,.35,.5,.7][lvl];sn
  paint();toast(done.length?"MUTATE "+lvl+" : "+done.join(" "):"RIEN À MUTER ICI")}
 $("#mutate").onclick=mutate;
 // ---------- ROLL: the notes as coloured lines, and what really plays (arps, slides, bends, twists) drawn over them, Amiga style
-const ROLL={on:false,cur:[],prev:[],lastX:-1,lo:36,hi:84};
+const ROLL={on:false,cur:[],prev:[],lastX:-1,lo:36,hi:84,style:"laser",mag:0};
 function rollStart(){if(ROLL.on)return;ROLL.on=true;requestAnimationFrame(rollFrame)}
 function rollFrame(){if(U.view!="roll"){ROLL.on=false;return}rollDraw();requestAnimationFrame(rollFrame)}
 function rollDraw(){const cv=$("#rollCv");const dpr=Math.min(2,window.devicePixelRatio||1),W=Math.round(cv.clientWidth*dpr),H=Math.round(cv.clientHeight*dpr);if(!W||!H)return;if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
@@ -1065,10 +1065,11 @@ function rollDraw(){const cv=$("#rollCv");const dpr=Math.min(2,window.devicePixe
  const lo=ROLL.lo,hi=ROLL.hi,Y=p=>TOP+HH-(p-lo)/(hi-lo)*HH,X=r=>r/16*W,q=v=>Math.round(v/PX)*PX;ROLL.g={W,H,TOP,HH,lo,hi,dpr,ph};
  // copper bars + scanlines
  g.fillStyle="#05060f";g.fillRect(0,0,W,H);
- for(let i=0;i<14;i++){const yy=((i*H/9)+(now*.02))%(H+80)-40,hue=(i*37+now*.01)%360;const gr=g.createLinearGradient(0,yy-30,0,yy+30);gr.addColorStop(0,"hsla("+hue+",90%,50%,0)");gr.addColorStop(.5,"hsla("+hue+",90%,55%,.10)");gr.addColorStop(1,"hsla("+hue+",90%,50%,0)");g.fillStyle=gr;g.fillRect(0,yy-30,W,60)}
+ for(let i=0;i<14;i++){const yy=((i*H/9)+(now*.02))%(H+80)-40,hue=(i*37+now*.01)%360;const gr=g.createLinearGradient(0,yy-30,0,yy+30);gr.addColorStop(0,"hsla("+hue+",90%,50%,0)");gr.addColorStop(.5,"hsla("+hue+",90%,55%,"+(ROLL.style!="pixel"?.05:.10)+")");gr.addColorStop(1,"hsla("+hue+",90%,50%,0)");g.fillStyle=gr;g.fillRect(0,yy-30,W,60)}
  // octaves + beats
  g.font=Math.round(16*dpr)+"px VT323,monospace";for(let p=Math.ceil(lo/12)*12;p<hi;p+=12){const y=q(Y(p));g.fillStyle="rgba(255,255,255,.10)";for(let x=0;x<W;x+=PX*3)g.fillRect(x,y,PX,1*dpr);g.fillStyle="rgba(255,255,255,.45)";g.fillText(nName(p).replace("-",""),PX,y-PX)}
  for(let r=0;r<=16;r+=4){g.fillStyle=r%16?"rgba(255,255,255,.06)":"rgba(255,255,255,.15)";g.fillRect(q(X(r)),TOP,Math.max(1,dpr),HH+DR)}
+ if(ROLL.style!="pixel"){laserDraw(g,{W,H,TOP,HH,lo,hi,dpr,ph,rows,X,Y,now});}else{
  // written notes: coloured bars, slides as ramps, arps as dotted ladders
  for(let tr=NT-1;tr>=0;tr--){const inf=trackInfo(tr,ph);if(!inf)continue;const col=regColor(inf.avg),dim=U.mute[tr]?.12:1;let cur=null;
   const seg=(a,b)=>{if(!cur)return;const y=q(Y(cur.p)),x0=q(X(a)),x1=q(X(b));g.globalAlpha=.30*dim;g.fillStyle=col;g.fillRect(x0,y-PX,Math.max(PX,x1-x0),PX*2);g.globalAlpha=.75*dim;g.fillRect(x0,y-PX,PX,PX*2);
@@ -1090,12 +1091,12 @@ function rollDraw(){const cv=$("#rollCv");const dpr=Math.min(2,window.devicePixe
   for(let i=0;i<96;i++){const d=rows[i/6|0].t[tr],b=d.b?d.b[i%6]:0;if(base[i]==null||!d.b){last=null;continue}const x=X(i/6),y=Y(base[i]+b);
    g.fillStyle=col;g.globalAlpha=ed?1:.55;if(last){const n=Math.max(1,Math.round(Math.hypot(x-last[0],y-last[1])/PX));for(let j=1;j<=n;j++)g.fillRect(q(last[0]+(x-last[0])*j/n),q(last[1]+(y-last[1])*j/n)-PX,PX,PX*2)}
    g.fillStyle="#fff";g.globalAlpha=ed?.9:.4;g.fillRect(q(x),q(y)-PX/2,PX,PX);last=[x,y]}}
- g.globalAlpha=1;
+ g.globalAlpha=1;}
  // drums strip
  const lanes=["k","s","h","o","p"],dc=["#ff3b3b","#ffd23f","#9fe8ff","#b28cff","#ff8a00"];g.fillStyle="rgba(255,255,255,.05)";g.fillRect(0,H-DR,W,DR);
  for(let r=0;r<16;r++)lanes.forEach((k,l)=>{if(rows[r][k]){g.fillStyle=dc[l];g.globalAlpha=(P.run&&P.playRow===r)?1:.55;g.fillRect(q(X(r))+PX,H-DR+PX+l*PX*2.5,q(W/16)-PX*2,PX*2)}});g.globalAlpha=1;
  // playhead + ghost
- if(xf>=0){g.fillStyle="#fff";g.fillRect(q(xf),TOP,PX,HH+DR);g.globalAlpha=.25;g.fillRect(q(xf)-PX*2,TOP,PX*5,HH+DR);g.globalAlpha=1}
+ {const xf=ROLL.style=="pixel"&&P.run&&P.playRow>=0?X(P.playRow+Math.min(1,(now-(P.rowT||now))/(60000/(P.bpm||S.bpm)/4))):-1;if(xf>=0){g.fillStyle="#fff";g.fillRect(q(xf),TOP,PX,HH+DR);g.globalAlpha=.25;g.fillRect(q(xf)-PX*2,TOP,PX*5,HH+DR);g.globalAlpha=1}}
  if(P.ghostRow>=0&&P.ghostPh===ph){g.fillStyle="#ff3ea5";for(let y=TOP;y<H;y+=PX*3)g.fillRect(q(X(P.ghostRow)),y,PX,PX*2)}
  // Workbench-style title bar
  g.fillStyle="#e8e8e8";g.fillRect(0,0,W,TOP-PX);g.fillStyle="#0050aa";g.font=Math.round(20*dpr)+"px VT323,monospace";g.fillText("KAP-ROLL · PHRASE "+hx(ph,2)+(S.scale>=0?" · "+KEYS[S.key]+" "+SCL[S.scale][0]:"")+(P.run?"":" · STOP"),PX*2,TOP-PX*2.6);
@@ -1110,7 +1111,7 @@ function rollPick(e){const cv=$("#rollCv"),G=ROLL.g;if(!G)return null;const rc=c
 function rollPaint(a,b,ph){const tr=ROLL.et,base=baseLine(tr,ph),rows=S.ph[ph];const i0=Math.min(a.i,b.i),i1=Math.max(a.i,b.i);
  for(let i=i0;i<=i1;i++){if(base[i]==null)continue;const d=rows[i/6|0].t[tr];const t=i1==i0?1:(i-a.i)/(b.i-a.i);let p=a.p+(b.p-a.p)*Math.max(0,Math.min(1,t));
   if(ROLL.tool=="erase"||ROLL.erasing){if(d.b){d.b[i%6]=0;if(d.b.every(v=>Math.abs(v)<.001))delete d.b}continue}
-  if(ROLL.mag)p=S.scale>=0?snap(Math.round(p)):Math.round(p);const v=Math.max(-24,Math.min(24,Math.round((p-base[i])*20)/20));if(!d.b)d.b=[0,0,0,0,0,0];d.b[i%6]=v}}
+  if(ROLL.mag==1)p=Math.round(p);else if(ROLL.mag==2)p=snapSc(p);const v=Math.max(-24,Math.min(24,Math.round((p-base[i])*20)/20));if(!d.b)d.b=[0,0,0,0,0,0];d.b[i%6]=v}}
 {const cv=$("#rollCv");cv.style.cursor="crosshair";cv.style.touchAction="none";
  cv.addEventListener("contextmenu",e=>e.preventDefault());
  cv.addEventListener("pointerdown",e=>{const pk=rollPick(e);if(!pk)return;ROLL.drag=true;ROLL.dlo=ROLL.g.lo;ROLL.dhi=ROLL.g.hi;ROLL.dph=ROLL.g.ph;ROLL.erasing=e.button==2||e.shiftKey;ROLL.last=pk;
@@ -1120,10 +1121,11 @@ function rollPaint(a,b,ph){const tr=ROLL.et,base=baseLine(tr,ph),rows=S.ph[ph];c
 function buildRollBar(){const el=$("#rollBar");el.innerHTML="";const lab=document.createElement("span");lab.className="mlab";lab.textContent="DESSINER SUR";el.appendChild(lab);
  for(let tr=0;tr<NT;tr++){const b=document.createElement("button");b.type="button";b.className="chip"+(tr===ROLL.et?" on":"");b.textContent="T"+(tr+1);const inf=trackInfo(tr,ROLL.g?ROLL.g.ph:U.ph);if(inf)b.style.borderColor=regColor(inf.avg);b.onclick=()=>{ROLL.et=tr;buildRollBar()};el.appendChild(b)}
  const t=document.createElement("button");t.type="button";t.className="chip"+(ROLL.tool=="erase"?" on":"");t.textContent=ROLL.tool=="erase"?"GOMME":"CRAYON";t.onclick=()=>{ROLL.tool=ROLL.tool=="erase"?"pen":"erase";buildRollBar()};
- const m=document.createElement("button");m.type="button";m.className="chip"+(ROLL.mag?" on":"");m.textContent="AIMANT "+(S.scale>=0?"GAMME":"DEMI-TONS");m.title="La courbe se colle sur les notes (de la gamme du morceau s'il y en a une)";m.onclick=()=>{ROLL.mag=!ROLL.mag;buildRollBar()};
+ const m=document.createElement("button");m.type="button";m.className="chip"+(ROLL.mag?" on":"");m.textContent=["PITCH LIBRE","AIMANT DEMI-TONS","ESCALIER GAMME"][ROLL.mag|0];m.title="LIBRE : la courbe suit ton doigt au centième de ton près · DEMI-TONS : elle se colle sur les demi-tons · GAMME : elle monte et descend en escalier sur les notes de la gamme ("+(S.scale>=0?SCL[S.scale][0]:"mineure, le morceau est en LIBRE")+")";m.onclick=()=>{ROLL.mag=((ROLL.mag|0)+1)%3;buildRollBar()};
+ const sty=document.createElement("button");sty.type="button";sty.className="chip"+(ROLL.style!="pixel"?" on":"");sty.textContent=ROLL.style!="pixel"?"LASER":"PIXEL";sty.title="Lignes laser fines et précises, ou gros pixels rétro";sty.onclick=()=>{ROLL.style=ROLL.style=="pixel"?"laser":"pixel";buildRollBar()};
  const c=document.createElement("button");c.type="button";c.className="chip";c.textContent="EFFACER LA PISTE";c.onclick=()=>{const ph=ROLL.g?ROLL.g.ph:U.ph;snapUndo("COURBES",ph);S.ph[ph].forEach(R=>{delete R.t[ROLL.et].b;delete R.t[ROLL.et].g});if(ph===U.ph)paint();else save();toast("COURBES DE T"+(ROLL.et+1)+" EFFACÉES")};
  const u=document.createElement("button");u.type="button";u.className="chip";u.textContent="↶";u.setAttribute("aria-label","Annuler");u.onclick=()=>$("#undo").click();
- el.append(t,m,c,u)}
+ el.append(t,m,sty,c,u)}
 // ---------- go
 function boot(o){
  const u=o&&o.ui||{};if(u.twister!=null)TWI=u.twister|0;if(u.shake!=null)SHK=u.shake|0;if(u.abB!=null)ABB=u.abB|0;if(u.abQ!=null)ABQ=u.abQ|0;if(u.skipIntro){SKIPI=1;$("#skipIntro").checked=true;introDone=true;$("#intro").hidden=true}if(u.mask!=null)MASK=u.mask|0;if(u.stairRate!=null)STR=u.stairRate|0;if(u.stairSkip!=null)STS=u.stairSkip|0||1;if(u.root!=null)ROOT=u.root|0;if(u.pscale!=null)PSCALE=u.pscale|0;if(u.pad)PADM={...PADDEF,...u.pad};if(Array.isArray(u.slots)&&u.slots.length==4)SLOTS=u.slots.map((x,i)=>STY[x.t]?{t:x.t,p:x.p|0}:{...SLOTDEF[i]});if(u.step!=null)STEP=u.step|0;if(u.skin){skin=u.skin;document.documentElement.dataset.skin=skin}if(u.chain)mode="chain";if(u.ph!=null)U.ph=u.ph|0;if(u.prate!=null)prate=u.prate|0;if(u.oct!=null)U.oct=u.oct|0;
@@ -1380,6 +1382,34 @@ function midiDrop(dt){if(!dt)return false;const f=dt.files&&dt.files[0];const ur
 try{window.__JUCE__.backend.addEventListener("mdata",o=>{const s=atob(o.b64),b=new Uint8Array(s.length);for(let i=0;i<s.length;i++)b[i]=s.charCodeAt(i);midiImport(b.buffer,o.name)})}catch(_){}
 {const row=document.createElement("div");row.className="phrow";row.style.marginTop="8px";const b=document.createElement("button");b.type="button";b.className="chip";b.textContent="IMPORTER UN MIDI";b.title="Un fichier .mid devient des phrases (à partir de la phrase affichée) : une partie MIDI par piste, drums GM sur les 5 couloirs. Tu peux aussi glisser le .mid sur le plugin";b.onclick=()=>send("mload",{});
  const h=document.createElement("span");h.className="hint";h.textContent="ou glisse un .mid sur le plugin · à partir de la phrase affichée";row.append(b,h);$("#songFiles").before(row)}
+
+// ---------- ROLL in LASER style: thin glowing lines, no pixel snapping, the exact pitch
+function snapSc(p){const sc=S.scale>=0?S.scale:3,deg=SCL[Math.max(0,Math.min(SCL.length-1,sc))][1],root=S.key|0;let best=Math.round(p),bd=1e9;
+ for(let o=Math.floor((p-root)/12)-1;o<=Math.floor((p-root)/12)+1;o++)deg.forEach(d=>{const m=root+o*12+d,e=Math.abs(m-p);if(e<bd){bd=e;best=m}});return best}
+function laserDraw(g,G){const {W,TOP,HH,dpr,ph,rows,X,Y,now}=G,lw=Math.max(1,1.3*dpr);
+ const beam=(pts,col,alpha,w)=>{if(pts.length<2)return;g.save();g.lineCap="round";g.lineJoin="round";g.globalAlpha=alpha;g.strokeStyle=col;g.shadowColor=col;g.shadowBlur=9*dpr;g.lineWidth=w;
+  g.beginPath();g.moveTo(pts[0][0],pts[0][1]);for(let k=1;k<pts.length;k++)g.lineTo(pts[k][0],pts[k][1]);g.stroke();g.shadowBlur=0;g.globalAlpha=alpha*.85;g.strokeStyle="rgba(255,255,255,.75)";g.lineWidth=Math.max(.6,w*.35);g.stroke();g.restore()};
+ for(let tr=NT-1;tr>=0;tr--){const inf=trackInfo(tr,ph);if(!inf)continue;const col=regColor(inf.avg),dim=U.mute[tr]?.15:1;let cur=null;
+  const seg=(a,b)=>{if(!cur)return;const y=Y(cur.p),x0=X(a),x1=X(b);beam([[x0,y],[x1,y]],col,.55*dim,lw);
+   g.save();g.globalAlpha=dim;g.fillStyle=col;g.shadowColor=col;g.shadowBlur=6*dpr;g.fillRect(x0-lw,y-4*dpr,lw*2,8*dpr);g.restore();
+   if(cur.arp){g.save();g.setLineDash([2*dpr,4*dpr]);[cur.arp>>4,cur.arp&15].forEach(o=>{if(o)beam([[x0,Y(cur.p+o)],[x1,Y(cur.p+o)]],col,.35*dim,lw*.8)});g.restore()}
+   if(cur.vib){const pts=[];for(let x=x0;x<=x1;x+=2*dpr)pts.push([x,y+Math.sin(x/(6*dpr))*3*dpr]);beam(pts,col,.45*dim,lw*.8)}};
+  for(let r=0;r<16;r++){const d=rows[r].t[tr];if(d.n===-2||d.n>=0){seg(cur?cur.r:r,r);if(d.n===-2){cur=null;continue}
+    let p=snap(d.n);if(d.c=="OCT")p+=12*((d.x>127?d.x-256:d.x)|0);const prev=cur;cur={r,p,arp:d.c=="ARP"?d.x:0,vib:d.c=="VIB"};
+    if(d.c=="SLD"&&prev){const len=Math.max(1,d.x)/6;beam([[X(r),Y(prev.p)],[X(r+len),Y(p)]],col,.7*dim,lw)}
+    if(d.c=="KIL"){seg(r,r+Math.min(15,d.x)/6);cur=null}}}
+  if(cur)seg(cur.r,16)}
+ const rowMs=60000/(P.bpm||S.bpm)/4,xf=P.run&&P.playRow>=0?X(P.playRow+Math.min(1,(now-(P.rowT||now))/rowMs)):-1;
+ if(xf>=0){if(ROLL.lastX>=0&&Math.abs(xf-ROLL.lastX)>W/2){ROLL.prev=ROLL.cur;ROLL.cur=[]}ROLL.lastX=xf;
+  for(let tr=0;tr<NT;tr++){const p=(P.pit||[])[tr],a=(P.amp||[])[tr]||0;if(p>0&&a>.02)ROLL.cur.push({x:xf,p,a,tr})}if(ROLL.cur.length>6000)ROLL.cur.splice(0,1000)}
+ const traces=(arr,alpha)=>{for(let tr=0;tr<NT;tr++){const inf=trackInfo(tr,ph),col=inf?regColor(inf.avg):"#fff";let run=[],lastPt=null,amp=0;
+   const flush=()=>{if(run.length>1)beam(run,col,alpha*(.45+amp*.55),lw*(1+amp));run=[];amp=0};
+   arr.forEach(pt=>{if(pt.tr!==tr)return;if(lastPt&&(pt.x-lastPt.x>W/32||pt.x<lastPt.x))flush();run.push([pt.x,Y(pt.p)]);amp=Math.max(amp,pt.a);lastPt=pt});flush()}};
+ traces(ROLL.prev,.2);traces(ROLL.cur,1);
+ if(xf>=0){g.save();g.fillStyle="#fff";g.shadowColor="#7fe9ff";g.shadowBlur=10*dpr;g.globalAlpha=.8;g.fillRect(xf,TOP,Math.max(1,dpr),HH);g.restore()}
+ for(let o=0;o<NT;o++){const tr=(ROLL.et+1+o)%NT,inf=trackInfo(tr,ph);if(!inf)continue;const base=baseLine(tr,ph),col=regColor(inf.avg),ed=tr===ROLL.et;let run=[];
+  const flush=()=>{beam(run,col,ed?1:.5,lw*1.2);run=[]};
+  for(let i=0;i<96;i++){const d=rows[i/6|0].t[tr];if(base[i]==null||!d.b){flush();continue}run.push([X(i/6),Y(base[i]+d.b[i%6])])}flush()}}
 })();
 
 </script>
