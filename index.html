@@ -76,7 +76,10 @@ setInterval(padPoll,16);
 addEventListener("gamepadconnected",e=>fire("toast",{t:"MANETTE : "+(e.gamepad.id||"OK").slice(0,30)}));
 
 // ---------- audio (the page is plain http on the home network, so a ScriptProcessor instead of an AudioWorklet)
-function audioStart(){if(ctx&&ctx.state!="running")ctx.resume()}
+// the screen stays awake while the app is in front (Android lets go by itself when you switch app)
+let wake=null;async function keepAwake(){try{if(!wake&&navigator.wakeLock&&document.visibilityState=="visible"){wake=await navigator.wakeLock.request("screen");wake.addEventListener("release",()=>{wake=null})}}catch(_){}}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState=="visible")keepAwake()});
+function audioStart(){keepAwake();if(ctx&&ctx.state!="running")ctx.resume()}
 addEventListener("pointerdown",audioStart,true);addEventListener("touchstart",audioStart,{capture:true,passive:true});
 
 // ---------- samples
@@ -232,6 +235,9 @@ html.phone body{padding-bottom:250px}
 .kpad-i{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}.kpad-i .kb{font-size:12px;text-align:left;padding:0 10px}
 .kpad-c{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.kpad-c .kb{color:var(--acc2);font-weight:700}
 .kpad-d{display:grid}.kpad-d .kb{min-height:70px;font-size:18px}
+
+.kppm{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:5px;grid-column:1/-1}.kppm .kb{color:#FFD166;font-weight:700;font-size:16px;min-height:38px}
+html.phone body{padding-bottom:300px}
 </style>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#08090C"><meta name="mobile-web-app-capable" content="yes">
@@ -1138,7 +1144,7 @@ function boot(o){
 try{window.__JUCE__.backend.addEventListener("key",nativeKey);window.__JUCE__.backend.addEventListener("init",o=>boot(o));window.__JUCE__.backend.addEventListener("st",onState)}catch(_){}
 $("#bpm").value=S.bpm;buildGrid();paintTw();paintMode();paula(false);buildAb();
 send("ready",{});
-window.MK2={S,U,P,TW};
+window.MK2={S,U,P,TW,ROLL};
 
 $("#raw").onclick=()=>rawP(true);
 const DIVN=["1/16","1/8","1/8 pointé","1/4","1/4 pointé","1/2"];
@@ -1337,6 +1343,8 @@ function kpUpdate(){const kp=$("#kpad");if(!kp)return;kp.hidden=U.view!="phrase"
  const B=(t,fn,cls,al)=>{const b=document.createElement("button");b.type="button";b.className="kb "+(cls||"");b.textContent=t;if(al)b.setAttribute("aria-label",al);
   b.addEventListener("pointerdown",e=>{e.preventDefault();fn();b.classList.add("dn");setTimeout(()=>b.classList.remove("dn"),120)});return b};
  const nav=$("#kpNav"),pad=$("#kpPad");nav.innerHTML="";pad.innerHTML="";pad.className="kpad-"+f;
+ const pm=document.createElement("div");pm.className="kppm";const big=f=="n"?"12":f=="x"?"16":"";
+ pm.append(B(big?"−"+big:"−",()=>{wheel(U.row,U.col,-1,!!big);paintSel()},"","Moins beaucoup"),B("−1",()=>{wheel(U.row,U.col,-1,false);paintSel()},"","Moins 1"),B("+1",()=>{wheel(U.row,U.col,1,false);paintSel()},"","Plus 1"),B(big?"+"+big:"+",()=>{wheel(U.row,U.col,1,!!big);paintSel()},"","Plus beaucoup"));
  nav.append(B("◀",()=>kpKey("ArrowLeft"),"",'Colonne précédente'),B("▲",()=>kpKey("ArrowUp"),"",'Ligne au-dessus'),B("▼",()=>kpKey("ArrowDown"),"",'Ligne en dessous'),B("▶",()=>kpKey("ArrowRight"),"",'Colonne suivante'),
   B("⇥",()=>kpKey("Tab"),"","Piste suivante"),B("⌫",()=>kpKey("Delete"),"del","Effacer"));
  if(f=="n"){const oc=document.createElement("div");oc.className="kpoct";oc.append(B("OCT −",()=>{U.oct=Math.max(0,U.oct-1);kpLast="";paintSel()}),Object.assign(document.createElement("span"),{textContent:"OCT "+U.oct}),B("OCT +",()=>{U.oct=Math.min(7,U.oct+1);kpLast="";paintSel()}),B("OFF",()=>kpKey("1"),"off","Note off"),B("↵ DERNIÈRE",()=>kpKey("Enter"),"","Répète la dernière note"));pad.appendChild(oc);
@@ -1346,7 +1354,8 @@ function kpUpdate(){const kp=$("#kpad");if(!kp)return;kp.hidden=U.view!="phrase"
  else if(f=="i"){for(let k=0;k<8;k++)pad.appendChild(B(hx(k,2)+" "+(S.ins[k].name||"").slice(0,8),()=>kpKey(String(k)),"ins"))}
  else if(f=="v"||f=="x"){for(let k=0;k<16;k++){const h=k.toString(16);pad.appendChild(B(h.toUpperCase(),()=>kpKey(h),"hex"))}}
  else if(f=="c"){Object.entries(CK).forEach(([k,cm])=>pad.appendChild(B(cm,()=>kpKey(k),"cmd")));pad.appendChild(B("---",()=>kpKey("Delete"),"cmd"))}
- else{pad.appendChild(B("● ON / OFF",()=>kpKey("Enter"),"drum"))}}
+ else{pad.appendChild(B("● ON / OFF",()=>kpKey("Enter"),"drum"))}
+ if(f!="d")pad.prepend(pm)}
 if(window.MK2PHONE){const kp=document.createElement("div");kp.id="kpad";kp.className="kpad";kp.innerHTML='<div id="kpNav" class="kpnav"></div><div id="kpPad"></div>';document.body.appendChild(kp);
  const v0=view;view=function(v){v0(v);kpLast="";kpUpdate()};setTimeout(()=>{kpLast="";kpUpdate()},300)}
 
