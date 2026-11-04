@@ -1,5 +1,5 @@
 // METAL KAP 2 PHONE offline: everything the app needs is kept on the phone; a new version is fetched in the background and used at the next start
-const V="mk2-71ced55fbe",FILES=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png"];
+const V="mk2-16a22e1d94",FILES=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener("fetch",e=>{const r=e.request;if(r.method!=="GET")return;
