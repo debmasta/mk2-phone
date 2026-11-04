@@ -267,14 +267,22 @@ html.phone body{padding-bottom:300px}
 :root[data-skin="wb"] body{font-weight:700}
 :root[data-skin="wb"] header{background:repeating-linear-gradient(0deg,#FFFFFF 0 2px,#0055AA 2px 4px) top/100% 12px no-repeat,#0055AA!important;border-bottom:2px solid #000022}
 :root[data-skin="wb"] header .logo{background:#0055AA!important;color:#FFFFFF!important;border:2px solid #FFFFFF}
-:root[data-skin="wb"] .chip,:root[data-skin="wb"] button{border:2px solid!important;border-color:#FFFFFF #000022 #000022 #FFFFFF!important;background:#0055AA;color:#FFFFFF}
-:root[data-skin="wb"] .chip.on,:root[data-skin="wb"] button.on{background:#FF8800!important;color:#000022!important;border-color:#000022 #FFFFFF #FFFFFF #000022!important}
+:root[data-skin="wb"] .chip:not([style*="border"]),:root[data-skin="wb"] button:not(.onT):not([style*="border"]){border:2px solid!important;border-color:#FFFFFF #000022 #000022 #FFFFFF!important;background:#0055AA;color:#FFFFFF}
+:root[data-skin="wb"] .chip.on:not([style*="border"]),:root[data-skin="wb"] button.on:not(.onT){background:#FF8800!important;color:#000022!important;border-color:#000022 #FFFFFF #FFFFFF #000022!important}
 :root[data-skin="wb"] input[type=range]{-webkit-appearance:none;appearance:none;height:16px;background:#0055AA;border:2px solid;border-color:#000022 #FFFFFF #FFFFFF #000022}
 :root[data-skin="wb"] input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:12px;background:#FFFFFF;border:0;border-right:2px solid #000022;border-bottom:2px solid #000022}
 :root[data-skin="wb"] input[type=range]:active::-webkit-slider-thumb{background:#FF8800}
-:root[data-skin="wb"] .c.e,:root[data-skin="wb"] .c.cmd.e{color:#3377BB}
-:root[data-skin="wb"] .r.now .c.e{color:#000022!important}
+/* tracker grid: dark navy (like FastTracker 2) and one colour per column (like Scream Tracker 3) */
+:root[data-skin="wb"] .grid{--rowA:#001133;--rowB:#00224D;background:#001133!important}
+:root[data-skin="wb"] .grid .r .ln{color:#6688AA}:root[data-skin="wb"] .grid .r.beat .ln{color:var(--acc)}
+:root[data-skin="wb"] .grid .c.ts{color:#FFFFFF!important}:root[data-skin="wb"] .grid .c.ts+.c{color:#FFCC44}:root[data-skin="wb"] .grid .c.ts+.c+.c{color:#77EE77}:root[data-skin="wb"] .grid .c.cmd{color:#66DDFF}:root[data-skin="wb"] .grid .c.cmd+.c{color:#FF99CC}
+:root[data-skin="wb"] .grid .c.e,:root[data-skin="wb"] .grid .c.cmd.e,:root[data-skin="wb"] .grid .c.ts+.c.e,:root[data-skin="wb"] .grid .c.ts+.c+.c.e,:root[data-skin="wb"] .grid .c.cmd+.c.e,:root[data-skin="wb"] .grid .c.ts.e{color:#2A4A75!important}
+:root[data-skin="wb"] .grid .r.now.r.now .c.c.c,:root[data-skin="wb"] .grid .r.now .ln{color:#000022!important}
 :root[data-skin="wb"] .c.lo{text-shadow:none}
+/* the per-track colours (register / live pitch) stay on in WORKBENCH */
+:root[data-skin="wb"] .tabs button.used{border-color:var(--ic)!important;box-shadow:inset 0 -4px 0 var(--ic)!important}
+:root[data-skin="wb"] .tabs button.used.on{background:var(--ic)!important;color:#000022!important;border-color:var(--ic)!important;box-shadow:none!important}
+:root[data-skin="wb"] .tname.reg{box-shadow:inset 0 -4px 0 var(--tc)!important}:root[data-skin="wb"] .tname.reg.cur{box-shadow:inset 0 -4px 0 var(--tc),0 0 0 2px var(--acc)!important}
 :root[data-skin="wb"] .c{white-space:nowrap;overflow:hidden}
 /* the pixel font only where it is big, at a whole multiple of its grid (11 px), so it stays sharp */
 :root[data-skin="wb"] .logo b,:root[data-skin="wb"] .ttl h1{font-family:'KapTopaz',monospace;font-size:33px;letter-spacing:0;font-weight:400}
@@ -770,7 +778,7 @@ function buildGrid(){grid.innerHTML="";
 // what a track mostly plays in this phrase: its register (for the colour) and its main instrument
 function trackInfo(tr,ph){const rows=S.ph[ph==null?U.ph:ph];let sum=0,n=0;const cnt={};rows.forEach(R=>{const d=R.t[tr];if(d&&d.n>=0){sum+=snap(d.n);n++;cnt[d.i]=(cnt[d.i]||0)+1}});
  if(!n)return null;let ins=0,best=-1;for(const k in cnt)if(cnt[k]>best){best=cnt[k];ins=+k}return{avg:sum/n,ins}}
-function regColor(avg){if(skin=="wb"){const W=["#FF7744","#FF8800","#FFBB00","#FFEE66","#FFFFFF","#AAEEFF","#66CCFF"];return W[Math.max(0,Math.min(6,Math.floor((avg-40)/7)))]}const u=Math.max(0,Math.min(1,(avg-44)/40));const h=Math.round(u<.6?u/.6*55:55+(u-.6)/.4*135),l=Math.round(48+u*37),sat=Math.round(95-u*25);return"hsl("+h+" "+sat+"% "+l+"%)"} // low = red, mid = orange / yellow, high = pale
+function regColor(avg){if(skin=="wb"){const W=["rgb(255 119 68)","rgb(255 136 0)","rgb(255 187 0)","rgb(255 238 102)","rgb(255 255 255)","rgb(170 238 255)","rgb(102 204 255)"];return W[Math.max(0,Math.min(6,Math.floor((avg-40)/7)))]}const u=Math.max(0,Math.min(1,(avg-44)/40));const h=Math.round(u<.6?u/.6*55:55+(u-.6)/.4*135),l=Math.round(48+u*37),sat=Math.round(95-u*25);return"hsl("+h+" "+sat+"% "+l+"%)"} // low = red, mid = orange / yellow, high = pale
 function paintHead(){$$(".tgo").forEach((g,l)=>{const tr=U.bank*4+l,inf=trackInfo(tr);g.title=g.ariaLabel="Ouvrir le synthé de T"+(tr+1)+(inf?" ("+S.ins[inf.ins].name+")":"")});
  $$(".tname.t0,.tname.t1,.tname.t2,.tname.t3").forEach((b,l)=>{const tr=U.bank*4+l,inf=trackInfo(tr);b.textContent="T"+(tr+1)+(U.mute[tr]?" · MUTE":inf?" · "+S.ins[inf.ins].name:"");
   const col=inf?regColor(inf.avg):"";b.style.setProperty("--tc",col||"transparent");b.classList.toggle("reg",!!inf);b.classList.toggle("low",!!inf&&inf.avg<50);
