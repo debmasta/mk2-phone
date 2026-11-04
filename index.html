@@ -259,37 +259,43 @@ html.phone body{padding-bottom:300px}
 /* NIGHT = blue-tinted carbon fibre */
 :root[data-skin="night"] body,:root[data-skin="night"] aside,:root[data-skin="night"] .grid{background-image:repeating-linear-gradient(45deg,rgba(150,190,255,.025) 0 2px,transparent 2px 4px),repeating-linear-gradient(-45deg,rgba(0,0,0,.28) 0 2px,transparent 2px 4px)}
 :root[data-skin="night"] nav{background-image:repeating-linear-gradient(45deg,rgba(150,190,255,.025) 0 2px,transparent 2px 4px),repeating-linear-gradient(-45deg,rgba(0,0,0,.28) 0 2px,transparent 2px 4px),linear-gradient(180deg,#111419,#0D0F13)}
-:root[data-skin="wb"]{--bg:#0055AA;--panel:#0055AA;--panel2:#004A96;--line:#FFFFFF;--ink:#FFFFFF;--dim:#AACCEE;--acc:#FF8800;--accInk:#000022;--acc2:#FFFFFF;--acc2Ink:#0055AA;--rowA:#0055AA;--rowB:#004C9C;--sel:#FF8800;--off:#003F80;
- --disp:'JetBrains Mono',Menlo,monospace;--body:'JetBrains Mono',Menlo,monospace;--mono:'JetBrains Mono',Menlo,monospace;--rad:0;--ls:0;--logoBg:#FFFFFF;--logoInk:#0055AA;--head:#FFFFFF;--headInk:#0055AA}
+:root[data-skin="wb"]{--wB:#0A2A6E;--wB2:#0B2560;--wW:#E8F0FF;--wK:#000814;--wO:#FF9A1F;--wG:#020A1E;--wG2:#071433;--wE:#1E3560;--wL:#5A73A0;--wOff:#10285A;--wD:#9DB4DD;--bg:var(--wB);--panel:var(--wB);--panel2:var(--wB2);--line:var(--wW);--ink:var(--wW);--dim:var(--wD);--acc:var(--wO);--accInk:var(--wK);--acc2:var(--wW);--acc2Ink:var(--wB);--rowA:var(--wB);--rowB:var(--wB2);--sel:var(--wO);--off:var(--wOff);
+ --disp:'JetBrains Mono',Menlo,monospace;--body:'JetBrains Mono',Menlo,monospace;--mono:'JetBrains Mono',Menlo,monospace;--rad:0;--ls:0;--logoBg:var(--wW);--logoInk:var(--wB);--head:var(--wW);--headInk:var(--wB)}
 @font-face{font-family:'KapTopaz';src:url(data:font/woff2;base64,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) format('woff2')}
+/* the three skins: shades of the Workbench blue (NUIT is the default above) */
+:root[data-skin="wb"][data-wbv="petrole"]{--wB:#0B4F6C;--wB2:#0A4661;--wW:#F0FAFF;--wK:#00121A;--wO:#FF7A1A;--wG:#031822;--wG2:#072634;--wE:#1D4556;--wL:#5F8A9C;--wOff:#0A3B50;--wD:#A8CFDD}
+:root[data-skin="wb"][data-wbv="outremer"]{--wB:#2B2F9E;--wB2:#262A8C;--wW:#FFFFFF;--wK:#08082A;--wO:#FF6F3C;--wG:#0B0C33;--wG2:#141650;--wE:#34388A;--wL:#7478C8;--wOff:#1E2180;--wD:#B9BBF2}
+/* hello: when the screen opens, buttons and tracker rows light up in a wave for a second (pure display, the sound goes on) */
+@keyframes hello{0%,100%{}12%,40%{background:var(--wO);color:var(--wK);border-color:var(--wO)}}
+:root.hello button,:root.hello .r:not(.h){animation:hello .55s steps(4,end) var(--hd,0ms) both}
 /* WORKBENCH = Amiga Workbench 1.3: blue / white / black / orange, square bevels, no glow, no gradient */
 :root[data-skin="wb"] *{border-radius:0!important;box-shadow:none!important;text-shadow:none!important;-webkit-font-smoothing:none}
 :root[data-skin="wb"] body,:root[data-skin="wb"] aside,:root[data-skin="wb"] .grid,:root[data-skin="wb"] nav{background-image:none!important}
 :root[data-skin="wb"] body{font-weight:700}
-:root[data-skin="wb"] header{background:repeating-linear-gradient(0deg,#FFFFFF 0 2px,#0055AA 2px 4px) top/100% 12px no-repeat,#0055AA!important;border-bottom:2px solid #000022}
-:root[data-skin="wb"] header .logo{background:#0055AA!important;color:#FFFFFF!important;border:2px solid #FFFFFF}
-:root[data-skin="wb"] .chip:not([style*="border"]),:root[data-skin="wb"] button:not(.onT):not([style*="border"]){border:2px solid!important;border-color:#FFFFFF #000022 #000022 #FFFFFF!important;background:#0055AA;color:#FFFFFF}
-:root[data-skin="wb"] .chip.on:not([style*="border"]),:root[data-skin="wb"] button.on:not(.onT){background:#FF8800!important;color:#000022!important;border-color:#000022 #FFFFFF #FFFFFF #000022!important}
-:root[data-skin="wb"] input[type=range]{-webkit-appearance:none;appearance:none;height:16px;background:#0055AA;border:2px solid;border-color:#000022 #FFFFFF #FFFFFF #000022}
-:root[data-skin="wb"] input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:12px;background:#FFFFFF;border:0;border-right:2px solid #000022;border-bottom:2px solid #000022}
-:root[data-skin="wb"] input[type=range]:active::-webkit-slider-thumb{background:#FF8800}
+:root[data-skin="wb"] header{background:repeating-linear-gradient(0deg,var(--wW) 0 2px,var(--wB) 2px 4px) top/100% 12px no-repeat,var(--wB)!important;border-bottom:2px solid var(--wK)}
+:root[data-skin="wb"] header .logo{background:var(--wB)!important;color:var(--wW)!important;border:2px solid var(--wW)}
+:root[data-skin="wb"] .chip:not([style*="border"]),:root[data-skin="wb"] button:not(.onT):not([style*="border"]){border:2px solid!important;border-color:var(--wW) var(--wK) var(--wK) var(--wW)!important;background:var(--wB);color:var(--wW)}
+:root[data-skin="wb"] .chip.on:not([style*="border"]),:root[data-skin="wb"] button.on:not(.onT){background:var(--wO)!important;color:var(--wK)!important;border-color:var(--wK) var(--wW) var(--wW) var(--wK)!important}
+:root[data-skin="wb"] input[type=range]{-webkit-appearance:none;appearance:none;height:16px;background:var(--wB);border:2px solid;border-color:var(--wK) var(--wW) var(--wW) var(--wK)}
+:root[data-skin="wb"] input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:12px;background:var(--wW);border:0;border-right:2px solid var(--wK);border-bottom:2px solid var(--wK)}
+:root[data-skin="wb"] input[type=range]:active::-webkit-slider-thumb{background:var(--wO)}
 /* tracker grid: dark navy (like FastTracker 2) and one colour per column (like Scream Tracker 3) */
-:root[data-skin="wb"] .grid{--rowA:#001133;--rowB:#00224D;background:#001133!important}
-:root[data-skin="wb"] .grid .r .ln{color:#6688AA}:root[data-skin="wb"] .grid .r.beat .ln{color:var(--acc)}
-:root[data-skin="wb"] .grid .c.ts{color:#FFFFFF!important}:root[data-skin="wb"] .grid .c.ts+.c{color:#FFCC44}:root[data-skin="wb"] .grid .c.ts+.c+.c{color:#77EE77}:root[data-skin="wb"] .grid .c.cmd{color:#66DDFF}:root[data-skin="wb"] .grid .c.cmd+.c{color:#FF99CC}
-:root[data-skin="wb"] .grid .c.e,:root[data-skin="wb"] .grid .c.cmd.e,:root[data-skin="wb"] .grid .c.ts+.c.e,:root[data-skin="wb"] .grid .c.ts+.c+.c.e,:root[data-skin="wb"] .grid .c.cmd+.c.e,:root[data-skin="wb"] .grid .c.ts.e{color:#2A4A75!important}
-:root[data-skin="wb"] .grid .r.now.r.now .c.c.c,:root[data-skin="wb"] .grid .r.now .ln{color:#000022!important}
+:root[data-skin="wb"] .grid{--rowA:var(--wG);--rowB:var(--wG2);background:var(--wG)!important}
+:root[data-skin="wb"] .grid .r .ln{color:var(--wL)}:root[data-skin="wb"] .grid .r.beat .ln{color:var(--acc)}
+:root[data-skin="wb"] .grid .c.ts{color:var(--wW)!important}:root[data-skin="wb"] .grid .c.ts+.c{color:#FFCC44}:root[data-skin="wb"] .grid .c.ts+.c+.c{color:#77EE77}:root[data-skin="wb"] .grid .c.cmd{color:#66DDFF}:root[data-skin="wb"] .grid .c.cmd+.c{color:#FF99CC}
+:root[data-skin="wb"] .grid .c.e,:root[data-skin="wb"] .grid .c.cmd.e,:root[data-skin="wb"] .grid .c.ts+.c.e,:root[data-skin="wb"] .grid .c.ts+.c+.c.e,:root[data-skin="wb"] .grid .c.cmd+.c.e,:root[data-skin="wb"] .grid .c.ts.e{color:var(--wE)!important}
+:root[data-skin="wb"] .grid .r.now.r.now .c.c.c,:root[data-skin="wb"] .grid .r.now .ln{color:var(--wK)!important}
 :root[data-skin="wb"] .c.lo{text-shadow:none}
 /* the per-track colours (register / live pitch) stay on in WORKBENCH */
 :root[data-skin="wb"] .tabs button.used{border-color:var(--ic)!important;box-shadow:inset 0 -4px 0 var(--ic)!important}
-:root[data-skin="wb"] .tabs button.used.on{background:var(--ic)!important;color:#000022!important;border-color:var(--ic)!important;box-shadow:none!important}
+:root[data-skin="wb"] .tabs button.used.on{background:var(--ic)!important;color:var(--wK)!important;border-color:var(--ic)!important;box-shadow:none!important}
 :root[data-skin="wb"] .tname.reg{box-shadow:inset 0 -4px 0 var(--tc)!important}:root[data-skin="wb"] .tname.reg.cur{box-shadow:inset 0 -4px 0 var(--tc),0 0 0 2px var(--acc)!important}
 :root[data-skin="wb"] .c{white-space:nowrap;overflow:hidden}
 /* the pixel font only where it is big, at a whole multiple of its grid (11 px), so it stays sharp */
 :root[data-skin="wb"] .logo b,:root[data-skin="wb"] .ttl h1{font-family:'KapTopaz',monospace;font-size:33px;letter-spacing:0;font-weight:400}
 :root[data-skin="wb"] aside h2{font-family:'KapTopaz',monospace;font-size:22px;font-weight:400}
 :root[data-skin="wb"] h2 i,:root[data-skin="wb"] nav i,:root[data-skin="wb"] .jp,:root[data-skin="wb"] .logo small{display:none}
-:root[data-skin="wb"] select,:root[data-skin="wb"] input[type=text]{background:#0055AA;color:#FFFFFF;border:2px solid;border-color:#000022 #FFFFFF #FFFFFF #000022}
+:root[data-skin="wb"] select,:root[data-skin="wb"] input[type=text]{background:var(--wB);color:var(--wW);border:2px solid;border-color:var(--wK) var(--wW) var(--wW) var(--wK)}
 :root[data-skin="pop"]{--bg:#DCE3EA;--panel:#E8EDF2;--panel2:#F5F7FA;--line:#B3BFCC;--ink:#14213D;--dim:#4E5B72;--acc:#FF5A1F;--accInk:#FFFFFF;--acc2:#2F6BFF;--acc2Ink:#FFFFFF;--rowA:#F5F7FA;--rowB:#E6ECF3;--sel:#2F6BFF;--off:#D3DBE4;
  --disp:'Michroma',sans-serif;--body:'Manrope',sans-serif;--mono:'Space Mono',monospace;--rad:14px;--ls:0;--logoBg:#14213D;--logoInk:#FFFFFF;--head:#14213D;--headInk:#FFFFFF}
 *{box-sizing:border-box}
@@ -371,7 +377,7 @@ main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;padding:16p
 .sm{min-width:36px;height:36px;border:1px solid var(--line);background:var(--panel2);border-radius:var(--rad);font-family:var(--mono);font-size:14px;padding:0 10px}
 .hint{font-size:12px;color:var(--dim);line-height:1.5}
 :root.nohelp .hint{display:none}
-:root[data-skin="wb"] .hint{color:#FFFFFF;font-weight:400}
+:root[data-skin="wb"] .hint{color:var(--wW);font-weight:400}
 .hint kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--ink)}
 .grid{border:1px solid var(--acc);background:var(--panel);border-radius:var(--rad);overflow-x:auto;overflow-y:hidden;font-family:var(--mono);font-size:13px;user-select:none;outline:none}
 :root[data-skin="pop"] .grid{border-color:var(--line)}
@@ -541,7 +547,7 @@ body.dropok .smpbox,body.dropok .thd{outline:2px dashed var(--acc2);outline-offs
   <div class="stat"><span>MODE</span><b><button type="button" class="chip" id="mode">LOOP PHRASE</button></b></div>
   <div class="sp"></div>
   <button type="button" class="chip" id="paula" title="Tout le son passe par une puce Paula d'Amiga : 8 bits, fréquence Amiga, filtres A500">PAULA</button><button type="button" class="chip" id="raw" title="RAW : coupe le compresseur et le limiteur du master. Le son brut de la puce, plus de dynamique (attention aux pics)">RAW</button><button type="button" class="chip" id="luff" title="Mini LUFF : disto des basses en parallèle + clipper, le grain reste">LUFF</button><button type="button" class="chip" id="led">LED ON</button><input type="range" id="ledAmt" min="0" max="1" step="0.01" value="1" aria-label="Force du filtre LED"><button type="button" class="chip" id="pdrv" title="Saturation douce (tanh) à l'entrée de Paula, là où les pistes s'additionnent : ×1 = juste arrondi, ×4 = écrasé">SAT ×1</button><button type="button" class="chip" id="prate" title="Fréquence d'échantillonnage de Paula">16K</button><button type="button" class="chip" id="v4" title="Mode Amiga : comme la vraie puce, seulement 4 pistes synthé sonnent en même temps. Une 5e coupe la plus ancienne (les drums ne comptent pas)">4 VOIX</button>
-  <button type="button" class="chip" id="skin">NIGHT ⇄ POP ⇄ WORKBENCH</button><button type="button" class="chip" id="help" title="Afficher / cacher les modes d'emploi">?</button>
+  <button type="button" class="chip" id="skin">SKIN : NUIT</button><button type="button" class="chip" id="help" title="Afficher / cacher les modes d'emploi">?</button>
   <button type="button" class="chip" id="fsBtn" title="Plein écran / taille normale">⛶</button>
   <div class="padst" id="padst"><svg width="34" height="22" viewBox="0 0 34 22" aria-hidden="true"><path d="M8 2 H26 C31 2 33 8 33 13 C33 19 29 21 26 18 L22 14 H12 L8 18 C5 21 1 19 1 13 C1 8 3 2 8 2 Z" fill="none" stroke-width="2"></path></svg><span id="padtxt">MANETTE ?</span></div>
  </div>
@@ -717,11 +723,13 @@ const send=(n,o)=>{try{window.__JUCE__.backend.emitEvent(n,o)}catch(_){}};
 let saveT=0,ready=false;const save=()=>{if(!ready)return;clearTimeout(saveT);saveT=setTimeout(()=>send("song",S),120)};
 // ---------- UI state
 const U={view:"phrase",ph:0,row:0,col:1,oct:4,last:[64,40,52,76,64,64,64,64],lastI:DEFI.slice(),chSel:0,ins:0,mute:[0,0,0,0,0,0,0,0],bank:0};
-let skin="night";
-document.documentElement.dataset.skin=skin;
-let HELP=1;const helpSet=v=>{HELP=v?1:0;document.documentElement.classList.toggle("nohelp",!HELP);$("#help").classList.toggle("on",!!HELP)};
-$("#skin").onclick=()=>{skin=skin=="night"?"pop":skin=="pop"?"wb":"night";document.documentElement.dataset.skin=skin;if(skin=="wb")helpSet(0);if(U.view=="phrase")paint();sendUi()};
-$("#help").onclick=()=>{helpSet(!HELP);sendUi()};helpSet(1);
+// skins: three shades of the Amiga Workbench blue (the old NIGHT / POP / WORKBENCH settings open as NUIT)
+const SKINS={nuit:"NUIT",petrole:"PÉTROLE",outremer:"OUTREMER"};let skin="nuit";
+const skinSet=v=>{skin=SKINS[v]?v:"nuit";document.documentElement.dataset.skin="wb";document.documentElement.dataset.wbv=skin;const b=$("#skin");if(b)b.textContent="SKIN : "+SKINS[skin]};
+skinSet(skin);
+let HELP=0;const helpSet=v=>{HELP=v?1:0;document.documentElement.classList.toggle("nohelp",!HELP);$("#help").classList.toggle("on",!!HELP)};
+$("#skin").onclick=()=>{const k=Object.keys(SKINS);skinSet(k[(k.indexOf(skin)+1)%k.length]);if(U.view=="phrase")paint();sendUi()};
+$("#help").onclick=()=>{helpSet(!HELP);sendUi()};helpSet(0);
 const toast=t=>{const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("on"),900)};
 const flash=()=>{const a=$("#app");a.classList.remove("flash");void a.offsetWidth;a.classList.add("flash")};
 // ---------- bridge to the plugin (the sound is made in C++)
@@ -781,7 +789,7 @@ function buildGrid(){grid.innerHTML="";
 // what a track mostly plays in this phrase: its register (for the colour) and its main instrument
 function trackInfo(tr,ph){const rows=S.ph[ph==null?U.ph:ph];let sum=0,n=0;const cnt={};rows.forEach(R=>{const d=R.t[tr];if(d&&d.n>=0){sum+=snap(d.n);n++;cnt[d.i]=(cnt[d.i]||0)+1}});
  if(!n)return null;let ins=0,best=-1;for(const k in cnt)if(cnt[k]>best){best=cnt[k];ins=+k}return{avg:sum/n,ins}}
-function regColor(avg){if(skin=="wb"){const W=["rgb(255 119 68)","rgb(255 136 0)","rgb(255 187 0)","rgb(255 238 102)","rgb(255 255 255)","rgb(170 238 255)","rgb(102 204 255)"];return W[Math.max(0,Math.min(6,Math.floor((avg-40)/7)))]}const u=Math.max(0,Math.min(1,(avg-44)/40));const h=Math.round(u<.6?u/.6*55:55+(u-.6)/.4*135),l=Math.round(48+u*37),sat=Math.round(95-u*25);return"hsl("+h+" "+sat+"% "+l+"%)"} // low = red, mid = orange / yellow, high = pale
+function regColor(avg){if(document.documentElement.dataset.skin=="wb"){const W=["rgb(255 119 68)","rgb(255 136 0)","rgb(255 187 0)","rgb(255 238 102)","rgb(255 255 255)","rgb(170 238 255)","rgb(102 204 255)"];return W[Math.max(0,Math.min(6,Math.floor((avg-40)/7)))]}const u=Math.max(0,Math.min(1,(avg-44)/40));const h=Math.round(u<.6?u/.6*55:55+(u-.6)/.4*135),l=Math.round(48+u*37),sat=Math.round(95-u*25);return"hsl("+h+" "+sat+"% "+l+"%)"} // low = red, mid = orange / yellow, high = pale
 function paintHead(){$$(".tgo").forEach((g,l)=>{const tr=U.bank*4+l,inf=trackInfo(tr);g.title=g.ariaLabel="Ouvrir le synthé de T"+(tr+1)+(inf?" ("+S.ins[inf.ins].name+")":"")});
  $$(".tname.t0,.tname.t1,.tname.t2,.tname.t3").forEach((b,l)=>{const tr=U.bank*4+l,inf=trackInfo(tr);b.textContent="T"+(tr+1)+(U.mute[tr]?" · MUTE":inf?" · "+S.ins[inf.ins].name:"");
   const col=inf?regColor(inf.avg):"";b.style.setProperty("--tc",col||"transparent");b.classList.toggle("reg",!!inf);b.classList.toggle("low",!!inf&&inf.avg<50);
@@ -1061,6 +1069,10 @@ function bootDisk(fs){if(introDone)return;introDone=true;const I=$("#intro");I.c
  setTimeout(()=>{$("#dled").classList.add("on");$("#dtext").innerHTML="LOADING…<br>METAL KAP 2"},450);
  setTimeout(()=>{$("#dled").classList.remove("on");$("#dtext").innerHTML="READY.";if(fs)fullscreen(true);I.classList.add("zoom")},1350);
  setTimeout(()=>I.classList.add("gone"),1800);setTimeout(()=>{I.hidden=true;grid.focus({preventScroll:true})},2300)}
+function hello(){introDone=true;const I=$("#intro");if(I)I.hidden=true;const R=document.documentElement;
+ [...document.querySelectorAll("button,.r:not(.h)")].forEach((el,i)=>el.style.setProperty("--hd",Math.min(i,90)*9+"ms"));
+ R.classList.remove("hello");void R.offsetWidth;R.classList.add("hello");setTimeout(()=>R.classList.remove("hello"),1400)}
+{const I=$("#intro");if(I)I.hidden=true;introDone=true}
 $("#openBtn").onclick=()=>bootDisk(false);$("#goBtn").onclick=()=>bootDisk(true);
 $("#skipIntro").onchange=e=>{SKIPI=e.target.checked?1:0;sendUi()};
 // ---------- presets: songs (whole tracker + twists setup) and instruments, saved as files by the plugin
@@ -1133,8 +1145,8 @@ function rollDraw(){const cv=$("#rollCv");const dpr=Math.min(2,window.devicePixe
  if(ROLL.drag)ROLL.lo=ROLL.dlo,ROLL.hi=ROLL.dhi;
  const lo=ROLL.lo,hi=ROLL.hi,Y=p=>TOP+HH-(p-lo)/(hi-lo)*HH,X=r=>r/16*W,q=v=>Math.round(v/PX)*PX;ROLL.g={W,H,TOP,HH,lo,hi,dpr,ph};
  // copper bars + scanlines
- const WB=skin=="wb",RF=WB?"KapTopaz,monospace":"VT323,monospace";   // WORKBENCH: flat blue screen, no copper bars
- g.fillStyle=WB?"#0055AA":"#05060f";g.fillRect(0,0,W,H);
+ const WB=document.documentElement.dataset.skin=="wb",RF=WB?"KapTopaz,monospace":"VT323,monospace";   // WORKBENCH: flat blue screen, no copper bars
+ g.fillStyle=WB?(getComputedStyle(document.documentElement).getPropertyValue("--wB").trim()||"#0055AA"):"#05060f";g.fillRect(0,0,W,H);
  if(!WB)for(let i=0;i<14;i++){const yy=((i*H/9)+(now*.02))%(H+80)-40,hue=(i*37+now*.01)%360;const gr=g.createLinearGradient(0,yy-30,0,yy+30);gr.addColorStop(0,"hsla("+hue+",90%,50%,0)");gr.addColorStop(.5,"hsla("+hue+",90%,55%,"+(ROLL.style!="pixel"?.05:.10)+")");gr.addColorStop(1,"hsla("+hue+",90%,50%,0)");g.fillStyle=gr;g.fillRect(0,yy-30,W,60)}
  // octaves + beats
  g.font=Math.round((WB?11:16)*dpr)+"px "+RF;for(let p=Math.ceil(lo/12)*12;p<hi;p+=12){const y=q(Y(p));g.fillStyle=WB?"rgba(255,255,255,.35)":"rgba(255,255,255,.10)";for(let x=0;x<W;x+=PX*3)g.fillRect(x,y,PX,1*dpr);g.fillStyle="rgba(255,255,255,.45)";g.fillText(nName(p).replace("-",""),PX,y-PX)}
@@ -1198,10 +1210,10 @@ function buildRollBar(){const el=$("#rollBar");el.innerHTML="";const lab=documen
  el.append(t,m,sty,c,u)}
 // ---------- go
 function boot(o){
- const u=o&&o.ui||{};if(u.twister!=null)TWI=u.twister|0;if(u.shake!=null)SHK=u.shake|0;if(u.abB!=null)ABB=u.abB|0;if(u.abQ!=null)ABQ=u.abQ|0;if(u.skipIntro){SKIPI=1;$("#skipIntro").checked=true;introDone=true;$("#intro").hidden=true}if(u.mask!=null)MASK=u.mask|0;if(u.stairRate!=null)STR=u.stairRate|0;if(u.stairSkip!=null)STS=u.stairSkip|0||1;if(u.root!=null)ROOT=u.root|0;if(u.pscale!=null)PSCALE=u.pscale|0;if(u.pad)PADM={...PADDEF,...u.pad};if(Array.isArray(u.slots)&&u.slots.length==4)SLOTS=u.slots.map((x,i)=>STY[x.t]?{t:x.t,p:x.p|0}:{...SLOTDEF[i]});if(u.step!=null)STEP=u.step|0;if(u.skin){skin=u.skin;document.documentElement.dataset.skin=skin}if(u.help!=null)helpSet(u.help);if(u.chain)mode="chain";if(u.ph!=null)U.ph=u.ph|0;if(u.prate!=null)prate=u.prate|0;if(u.oct!=null)U.oct=u.oct|0;
+ const u=o&&o.ui||{};if(u.twister!=null)TWI=u.twister|0;if(u.shake!=null)SHK=u.shake|0;if(u.abB!=null)ABB=u.abB|0;if(u.abQ!=null)ABQ=u.abQ|0;if(u.skipIntro){SKIPI=1;$("#skipIntro").checked=true;introDone=true;$("#intro").hidden=true}if(u.mask!=null)MASK=u.mask|0;if(u.stairRate!=null)STR=u.stairRate|0;if(u.stairSkip!=null)STS=u.stairSkip|0||1;if(u.root!=null)ROOT=u.root|0;if(u.pscale!=null)PSCALE=u.pscale|0;if(u.pad)PADM={...PADDEF,...u.pad};if(Array.isArray(u.slots)&&u.slots.length==4)SLOTS=u.slots.map((x,i)=>STY[x.t]?{t:x.t,p:x.p|0}:{...SLOTDEF[i]});if(u.step!=null)STEP=u.step|0;if(u.skin){skinSet(u.skin)}if(u.help!=null)helpSet(u.help);if(u.chain)mode="chain";if(u.ph!=null)U.ph=u.ph|0;if(u.prate!=null)prate=u.prate|0;if(u.oct!=null)U.oct=u.oct|0;
  const had=o&&o.song&&loadSong(o.song);
  if(o&&o.p)applyP(o.p);paintMode();paula(false);$("#bpm").value=S.bpm;$("#swing").value=String(S.swing||0);paintScale();buildGrid();buildSlots();buildMask();buildTv();paintBank();paintTw();buildPad();paintTools();buildAb();paintShk();
- ready=true;if(!had)send("song",S);uiPlay=0;sendUi();if(o&&o.ver)$("#ver").textContent=o.ver}
+ ready=true;if(!had)send("song",S);uiPlay=0;sendUi();if(o&&o.ver)$("#ver").textContent=o.ver;setTimeout(hello,60)}
 try{window.__JUCE__.backend.addEventListener("key",nativeKey);window.__JUCE__.backend.addEventListener("init",o=>boot(o));window.__JUCE__.backend.addEventListener("st",onState)}catch(_){}
 $("#bpm").value=S.bpm;buildGrid();paintTw();paintMode();paula(false);buildAb();
 send("ready",{});
