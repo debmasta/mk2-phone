@@ -374,6 +374,8 @@ main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column;padding:16p
 .ttl .rule{flex:1;min-width:30px;border-top:1px solid var(--line)}
 .sm{min-width:36px;height:36px;border:1px solid var(--line);background:var(--panel2);border-radius:var(--rad);font-family:var(--mono);font-size:14px;padding:0 10px}
 .hint{font-size:12px;color:var(--dim);line-height:1.5}
+.chwarn{font-size:12px;line-height:1.4;color:var(--wO,var(--acc2));max-width:640px}.chwarn.ok{color:var(--dim)}
+:root[data-skin="wb"] .chwarn.ok{color:var(--wD)}
 :root.nohelp .hint{display:none}
 :root[data-skin="wb"] .hint{color:var(--wW);font-weight:400}
 .hint kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--ink)}
@@ -578,6 +580,7 @@ body.dropok .smpbox,body.dropok .thd{outline:2px dashed var(--acc2);outline-offs
   </section>
   <section id="v-chain" hidden>
    <div class="ttl"><h1>Chain</h1><span class="jp">チェーン</span><div class="rule"></div></div>
+   <div class="phrow" id="chModeRow"><button type="button" class="chip" id="chMode"></button><span class="chwarn" id="chModeH"></span></div>
    <p class="hint">L'ordre des phrases quand le MODE est sur CHAIN. Clic = choisir · molette = changer le numéro · clic droit = vider · double-clic = ouvrir la phrase.</p>
    <div class="chain" id="chain"></div>
   </section>
@@ -604,7 +607,7 @@ body.dropok .smpbox,body.dropok .thd{outline:2px dashed var(--acc2);outline-offs
    <canvas id="rollCv" class="rollcv" aria-label="Vue roll des notes : dessine des courbes de pitch sur les notes"></canvas>
   </section>
   <section id="v-files" hidden>
-   <div class="ttl"><h1>Morceaux</h1><span class="jp">セーブ</span><div class="rule"></div><button type="button" class="chip" id="songFolder">OUVRIR LE DOSSIER</button></div>
+   <div class="ttl"><h1>Morceaux</h1><span class="jp">セーブ</span><div class="rule"></div><button type="button" class="chip" id="songImport" title="Choisis un fichier reçu (.mk2.json, .txt…) : il est rangé tout seul dans tes morceaux">IMPORTER UN FICHIER</button><button type="button" class="chip" id="songFolder">OUVRIR LE DOSSIER</button></div>
    <p class="hint">Sauve tout le morceau : les 16 phrases, la chaîne, les 8 instruments, les drums, la gamme, le swing et les réglages des twists. Les fichiers vont dans Musique / METAL KAP 2 / Songs, tu peux les copier ou les partager.</p>
    <div class="fsave"><input type="text" id="songName" placeholder="nom du morceau" aria-label="Nom du morceau" maxlength="60"><button type="button" class="chip" id="songSave">SAUVER</button></div>
    <div class="flist" id="songFiles"></div>
@@ -614,6 +617,7 @@ body.dropok .smpbox,body.dropok .thd{outline:2px dashed var(--acc2);outline-offs
   </section>
   <section id="v-fx" hidden>
    <div class="ttl"><h1>Effets</h1><span class="jp">エフェクト</span><div class="rule"></div></div>
+   <div class="phrow"><button type="button" class="chip" id="abT2" title="Maintiens : la phrase B remplace ce qui joue. Tu lâches : retour à A.">A / B</button><select id="abB2" aria-label="Phrase B" class="mlvl"></select><select id="abQ2" aria-label="Quand basculer" class="mlvl"><option value="0">fin de phrase</option><option value="1">direct</option></select><span class="hint">A / B : maintiens = phrase B, tu lâches = retour sur A</span></div>
    <p class="hint">Delay et reverb en envoi : chaque piste choisit combien elle envoie. Le delay suit le tempo. Astuce : mets un slot de la manette sur <b>DELAY THROW</b> pour balancer les pistes touchées dans le delay en tenant le bouton (le dub style).</p>
    <div class="fxw"><div class="fxbox"><h3>DELAY</h3><div id="fxD"></div></div><div class="fxbox"><h3>REVERB</h3><div id="fxR"></div></div>
    <div class="fxbox" style="grid-column:span 2"><h3>PISTES · ENVOIS · SAT · PAULA PAR PISTE</h3><div class="fxm" id="fxM"></div></div></div>
@@ -763,7 +767,10 @@ function play(){uiPlay=P.run?0:1;sendUi();if(!uiPlay&&P.run&&hostRun)toast("LE P
 let hostRun=false;
 $("#play").onclick=()=>play();
 $("#mode").onclick=()=>{mode=mode=="phrase"?"chain":"phrase";paintMode();sendUi()};
-function paintMode(){$("#mode").textContent=mode=="chain"?"CHAIN":"LOOP PHRASE";$("#mode").classList.toggle("on",mode=="chain")}
+function paintMode(){$("#mode").textContent=mode=="chain"?"CHAIN":"LOOP PHRASE";$("#mode").classList.toggle("on",mode=="chain");$("#mode").title="LOOP PHRASE = la phrase affichée tourne en boucle. CHAIN = les phrases jouent dans l'ordre de la page Chain.";
+ const c=$("#chMode");if(c){c.textContent=mode=="chain"?"LECTURE : CHAIN":"LECTURE : LOOP PHRASE";c.classList.toggle("on",mode=="chain");
+  $("#chModeH").classList.toggle("ok",mode=="chain");$("#chModeH").textContent=mode=="chain"?"La chain est jouée : les phrases s'enchaînent dans l'ordre ci-dessous. Clique pour revenir à la boucle d'une seule phrase.":"⚠ La chain n'est PAS jouée : seule la phrase affichée tourne en boucle. Clique ici pour jouer la chain."}}
+$("#chMode").onclick=()=>{mode=mode=="phrase"?"chain":"phrase";paintMode();sendUi()};
 $("#bpm").addEventListener("input",e=>{const v=+e.target.value;if(v>=40&&v<=300){S.bpm=v;save()}});
 // ---------- tracker grid
 // columns: 0 = line · 1..20 = 4 tracks × (NOTE INS VOL CMD VAL) · 21..23 = KCK SNR HAT
@@ -948,14 +955,21 @@ function drawSample(){const cv=$("#smpCv");if(!cv)return;const I=S.ins[U.ins],in
 // slice k starts here, 0-1 between START and END (moved points in I.cuts, else equal slices)
 function sliceAt(I,k){const ns=I.slices||8;if(k<=0)return 0;if(k>=ns)return 1;return Array.isArray(I.cuts)&&I.cuts.length==ns-1?I.cuts[k-1]:k/ns}
 function cutsInit(I){const ns=I.slices||8;if(!(Array.isArray(I.cuts)&&I.cuts.length==ns-1))I.cuts=Array.from({length:ns-1},(_,k)=>(k+1)/ns)}
-let SDRG=-1;
+let SDRG=-1,SMT=0;
 function smpAud(){const I=S.ins[U.ins];send("aud",{n:I.smode==1?48:60,i:U.ins,v:1})}
 function smpCanvas(cv){let drag=null;const P2=e=>{const b=cv.getBoundingClientRect();return{x:(e.clientX-b.left)/b.width,px:e.clientX-b.left,w:b.width}};
  cv.addEventListener("wheel",e=>{e.preventDefault();const p=P2(e),at=ZW.a+(ZW.b-ZW.a)*p.x;if(e.shiftKey||Math.abs(e.deltaX)>Math.abs(e.deltaY)){const d=(e.shiftKey?e.deltaY:e.deltaX)/400*(ZW.b-ZW.a);zwSet(ZW.a+d,ZW.b+d)}else zwZoom(e.deltaY<0?.8:1.25,at)},{passive:false});
  cv.addEventListener("contextmenu",e=>e.preventDefault());
- cv.addEventListener("pointerdown",e=>{const I=S.ins[U.ins],p=P2(e),pos=ZW.a+(ZW.b-ZW.a)*p.x,xs=(I.st||0),xe=I.en==null?1:I.en,px=v=>(v-ZW.a)/(ZW.b-ZW.a)*p.w;
-  let sk=-1;if(I.smode==1){const ns=I.slices||8;let best=10;for(let k=1;k<ns;k++){const d=Math.abs(px(xs+(xe-xs)*sliceAt(I,k))-p.px);if(d<best){best=d;sk=k}}}
-  drag=Math.abs(px(xe)-p.px)<10?"en":Math.abs(px(xs)-p.px)<10?"st":sk>0?"c":(e.button==2||e.altKey)?"en":"st";if(drag=="c"){SDRG=sk;cutsInit(I)}try{cv.setPointerCapture(e.pointerId)}catch(_){}move(e)});
+ // only the markers (START, END, slice lines) react to a click, so a stray touch never moves anything.
+ // Empty space: double-click / double-tap puts the START there, Alt + click or right click puts the END (or pick a tool with the CLIC VIDE button)
+ let lastEmpty={t:0,x:-99};
+ cv.addEventListener("pointerdown",e=>{const I=S.ins[U.ins],p=P2(e),xs=(I.st||0),xe=I.en==null?1:I.en,px=v=>(v-ZW.a)/(ZW.b-ZW.a)*p.w,tol=e.pointerType=="touch"?26:10;
+  let best=tol,kind=null,sk=-1;const dE=Math.abs(px(xe)-p.px),dS=Math.abs(px(xs)-p.px);
+  if(dE<best){best=dE;kind="en"}if(dS<best){best=dS;kind="st"}
+  if(I.smode==1){const ns=I.slices||8;for(let k=1;k<ns;k++){const d=Math.abs(px(xs+(xe-xs)*sliceAt(I,k))-p.px);if(d<best){best=d;kind="c";sk=k}}}
+  if(!kind){const now=performance.now(),dbl=now-lastEmpty.t<400&&Math.abs(p.px-lastEmpty.x)<24;lastEmpty={t:now,x:p.px};
+   if(e.button==2||e.altKey)kind="en";else if(dbl||SMT==1)kind="st";else if(SMT==2)kind="en";else return}
+  drag=kind;if(drag=="c"){SDRG=sk;cutsInit(I)}try{cv.setPointerCapture(e.pointerId)}catch(_){}move(e)});
  const move=e=>{if(!drag)return;const I=S.ins[U.ins],p=P2(e);let pos=Math.max(0,Math.min(1,ZW.a+(ZW.b-ZW.a)*p.x));
   if(drag=="c"){const s0=I.st||0,s1=I.en==null?1:I.en,gap=.002;let r=(pos-s0)/Math.max(1e-9,s1-s0);r=Math.max(sliceAt(I,SDRG-1)+gap,Math.min(sliceAt(I,SDRG+1)-gap,r));I.cuts[SDRG-1]=r;drawSample();return}
   if(drag=="st")I.st=Math.min(pos,(I.en==null?1:I.en)-1e-4);else I.en=Math.max(pos,(I.st||0)+1e-4);drawSample()};
@@ -969,15 +983,25 @@ function sampleBox(p,I){const box=document.createElement("div");box.className="s
  const nm=document.createElement("span");nm.className="smpn";const inf=SINFO[U.ins];nm.textContent=inf&&inf.name?inf.name+" · "+(+inf.sec).toFixed(2)+" s":"aucun sample";
  const md=document.createElement("select");md.setAttribute("aria-label","Mode du sampler");[["0","CHROMATIQUE (C4 = hauteur d'origine)"],["1","TRANCHES (C3 = tranche 1, C#3 = 2…)"]].forEach(([v,t])=>md.add(new Option(t,v)));md.value=String(I.smode|0);md.onchange=()=>{I.smode=+md.value;save();drawSample()};
  const ns=document.createElement("select");ns.setAttribute("aria-label","Nombre de tranches");[4,8,16,32].forEach(v=>ns.add(new Option(v+" tranches",v)));ns.value=String(I.slices||8);ns.onchange=()=>{I.slices=+ns.value;delete I.cuts;save();drawSample()};
- top.append(ld,cl,nm,md,ns);const cv=document.createElement("canvas");cv.id="smpCv";cv.className="smpcv";smpCanvas(cv);
+ const lnS=document.createElement("select");lnS.setAttribute("aria-label","Longueur d'une tranche");lnS.title="Découpe DÉBUT → FIN en tranches de même longueur";
+
+ [["","LONGUEUR → TRANCHES"],["ms:25","25 ms"],["ms:50","50 ms"],["ms:100","100 ms"],["ms:250","250 ms"],["ms:500","500 ms"],["b:.25","1/16 de note"],["b:.5","1/8 de note"],["b:1","1/4 de note (1 temps)"],["b:2","1/2 note (2 temps)"],["b:4","1 mesure (4 temps)"]].forEach(([v,t])=>lnS.add(new Option(t,v)));
+ const lnI=document.createElement("input");lnI.type="number";lnI.min="5";lnI.max="5000";lnI.step="5";lnI.placeholder="ms";lnI.title="Longueur d'une tranche en millisecondes";lnI.style.width="64px";
+ const sliceLen=(sec,lab)=>{const inf=SINFO[U.ins],dur=inf&&inf.sec;if(!dur)return toast("CHARGE D'ABORD UN SAMPLE");const reg=((I.en==null?1:I.en)-(I.st||0))*dur;if(!(sec>0.001)||reg<=0)return;
+  const n=Math.max(1,Math.min(64,Math.ceil(reg/sec-1e-6)));I.slices=n;I.smode=1;I.cuts=Array.from({length:n-1},(_,k)=>Math.min(.999,(k+1)*sec/reg));
+  if(![...ns.options].some(o=>+o.value==n))ns.add(new Option(n+" tranches",n));ns.value=String(n);md.value="1";save();drawSample();toast(n+" TRANCHES DE "+lab+(reg/sec>64?" (max 64)":""))};
+ lnS.onchange=()=>{const v=lnS.value;lnS.value="";if(!v)return;const [k,x]=v.split(":");if(k=="ms")sliceLen(+x/1000,x+" ms");else sliceLen(+x*60/(S.bpm||120),lnS.querySelector('option[value="'+v+'"]').textContent)};
+ lnI.onchange=()=>{const ms=+lnI.value;if(ms>=5)sliceLen(ms/1000,ms+" ms")};
+ top.append(ld,cl,nm,md,ns,lnS,lnI);const cv=document.createElement("canvas");cv.id="smpCv";cv.className="smpcv";smpCanvas(cv);
  const zb=document.createElement("div");zb.className="dlh zbar";const B=(t,f,ti)=>{const b=document.createElement("button");b.type="button";b.className="chip";b.textContent=t;if(ti)b.title=ti;b.onclick=f;zb.appendChild(b);return b};
  B("−",()=>zwZoom(1.6),"Dézoomer");B("+",()=>zwZoom(1/1.6),"Zoomer");B("TOUT",()=>zwSet(0,1),"Voir tout le sample");
  B("ZOOM DÉBUT",()=>{const s0=I.st||0;zwSet(s0-.004,s0+.02)},"Zoome très fort sur le marqueur de début");
  B("◀",()=>{I.st=Math.max(0,(I.st||0)-(ZW.b-ZW.a)/200);save();drawSample()},"Recule le début d'un poil");B("▶",()=>{I.st=Math.min((I.en==null?1:I.en)-1e-4,(I.st||0)+(ZW.b-ZW.a)/200);save();drawSample()},"Avance le début d'un poil");
  B("ATTAQUE SUIVANTE ⇥",()=>send("ssnap",{slot:U.ins,from:I.st||0,k:"st"}),"Cale le début sur la prochaine attaque (pile sur un passage à zéro)");
+ const tb=B("CLIC VIDE : RIEN",()=>{SMT=(SMT+1)%3;tb.textContent=["CLIC VIDE : RIEN","CLIC VIDE : DÉBUT","CLIC VIDE : FIN"][SMT];tb.classList.toggle("on",SMT>0)},"Rien = un clic à côté d'un marqueur ne bouge rien (double-clic = place le DÉBUT, Alt + clic = place la FIN). DÉBUT / FIN : un clic dans le vide place ce marqueur.");tb.textContent=["CLIC VIDE : RIEN","CLIC VIDE : DÉBUT","CLIC VIDE : FIN"][SMT];tb.classList.toggle("on",SMT>0);
  B("▷ ÉCOUTER",smpAud);B("TRANCHES ÉGALES",()=>{delete I.cuts;save();drawSample()},"Remet les tranches à égalité entre DÉBUT et FIN");B("RESET",()=>{I.st=0;I.en=1;save();zwSet(0,1)},"Début et fin remis aux bords du sample");
  const zl=document.createElement("span");zl.id="smpZ";zl.className="smpn";zb.appendChild(zl);
- const hl=document.createElement("div");hl.className="hint";hl.textContent="Molette = zoom (Maj + molette = défiler) · clic = place le DÉBUT · clic droit ou Alt + clic = place la FIN · tire les marqueurs · ce qui est grisé ne joue pas · en mode TRANCHES, tire chaque trait de tranche pour la déplacer (lâcher = écoute la tranche)";
+ const hl=document.createElement("div");hl.className="hint";hl.textContent="Molette = zoom (Maj + molette = défiler) · tire les marqueurs (DÉBUT, FIN, traits de tranche) · double-clic = place le DÉBUT · clic droit ou Alt + clic = place la FIN (un clic simple dans le vide ne bouge rien) · ce qui est grisé ne joue pas · en mode TRANCHES, tire chaque trait de tranche pour la déplacer (lâcher = écoute la tranche)";
  box.append(top,cv,zb,hl);p.prepend(box);setTimeout(()=>{drawSample();zwReq()},0)}
 try{window.__JUCE__.backend.addEventListener("sinfo",o=>{if(o.err){toast("FICHIER AUDIO ILLISIBLE");return}SINFO[o.slot]=o;if(o.slot===ZW.slot){ZW.data=null;ZW.len=0;ZW.a=0;ZW.b=1}if(U.view=="synth"&&U.ins==o.slot){buildIns()}if(o.name)toast("SAMPLE : "+o.name)})}catch(_){}
 // drag & drop of audio files (Ableton browser, Finder): on the SYNTH page = the open slot; on a track name = that track's instrument
@@ -1090,8 +1114,10 @@ function saver(kind,inp,btn){btn.onclick=()=>{const name=inp.value.trim();if(!na
   delete btn.dataset.arm;btn.textContent="SAUVER";send("psave",kind=="ins"?{kind,name,slot:U.ins,data:{ins:S.ins[U.ins]}}:{kind,name,data:songData()})};
  inp.addEventListener("keydown",e=>{if(e.key=="Enter")btn.click()})}
 saver("song",$("#songName"),$("#songSave"));saver("ins",$("#insName"),$("#insSave"));
+if(window.MK2PHONE)$("#songImport").hidden=true;$("#songImport").onclick=()=>send("pimportfile",{});
 $("#songFolder").onclick=()=>send("pfolder",{kind:"song"});$("#insFolder").onclick=()=>send("pfolder",{kind:"ins"});
 try{window.__JUCE__.backend.addEventListener("plist",o=>{PL[o.kind]=o.names||[];paintFiles(o.kind)});
+ window.__JUCE__.backend.addEventListener("pimported",o=>toast(o.ok?"IMPORTÉ : "+o.name+" (clique dessus pour le charger)":"FICHIER ILLISIBLE : ce n'est pas un morceau METAL KAP"));
  window.__JUCE__.backend.addEventListener("psaved",o=>toast(o.ok?"SAUVÉ : "+o.name:"IMPOSSIBLE DE SAUVER"));
  window.__JUCE__.backend.addEventListener("pdata",o=>{if(o.kind=="ins"){if(!o.data||!o.data.ins)return toast("FICHIER ILLISIBLE");S.ins[U.ins]={...INSDEF[U.ins],...o.data.ins};buildIns();save();auIns();toast(o.name+" → SLOT "+hx(U.ins,2))}
   else{applySong(o.data);view("phrase");toast("MORCEAU : "+o.name)}})}catch(_){}
@@ -1278,14 +1304,15 @@ function blkKey(k,sh){
 {const cp=$("#phCopy").onclick,ps=$("#phPaste").onclick;$("#phCopy").onclick=e=>{if(U.sa)return blkCopy(false);LASTK="ph";cp(e)};$("#phPaste").onclick=e=>{if(LASTK=="blk")return blkPaste(false);ps(e)}}
 
 // ---------- A/B: one button (screen or controller) swaps the playing phrase for phrase B, and back
-function buildAb(){const b=$("#abB"),q=$("#abQ");if(!b.options.length)for(let i=0;i<16;i++){const o=document.createElement("option");o.value=i;o.textContent="B = "+hx(i,2);b.appendChild(o)}b.value=String(ABB);q.value=String(ABQ);paintAb()}
-function paintAb(){const t=$("#abT");t.classList.toggle("on",ABON>=0);t.textContent=ABON>=0?"▶ B":"A / B"}
-// the screen button is momentary: B only while the button is down, back to A as soon as you let go
-{const t=$("#abT");let dn=0;
+function buildAb(){for(const [bi,qi] of [["#abB","#abQ"],["#abB2","#abQ2"]]){const b=$(bi),q=$(qi);if(!b.options.length)for(let i=0;i<16;i++){const o=document.createElement("option");o.value=i;o.textContent="B = "+hx(i,2);b.appendChild(o)}b.value=String(ABB);q.value=String(ABQ)}paintAb()}
+function paintAb(){for(const id of ["#abT","#abT2"]){const t=$(id);t.classList.toggle("on",ABON>=0);t.textContent=ABON>=0?"▶ B":"A / B"}}
+// the screen buttons are momentary: B only while the button is down, back to A as soon as you let go
+function abHold(t){let dn=0;
  t.addEventListener("pointerdown",e=>{e.preventDefault();try{t.setPointerCapture(e.pointerId)}catch(_){}dn=1;send("tw",{k:"ab",v:1})});
  const up=()=>{if(!dn)return;dn=0;send("tw",{k:"ab",v:0})};
  t.addEventListener("pointerup",up);t.addEventListener("pointercancel",up);t.addEventListener("lostpointercapture",up);t.addEventListener("click",e=>e.preventDefault())}
-$("#abB").onchange=e=>{ABB=+e.target.value;sendUi()};$("#abQ").onchange=e=>{ABQ=+e.target.value;sendUi()};
+abHold($("#abT"));abHold($("#abT2"));
+["#abB","#abB2"].forEach(q=>$(q).onchange=e=>{ABB=+e.target.value;buildAb();sendUi()});["#abQ","#abQ2"].forEach(q=>$(q).onchange=e=>{ABQ=+e.target.value;buildAb();sendUi()});
 
 // ---------- expressive lights: headers breathe with the real level, the filter darkens / brightens the touched tracks,
 // tracks under an active twist glow, kicks (and low basses) shake the grid
@@ -1358,7 +1385,7 @@ function blkDup(){if(U.sa){const b=blkRect(),h=b.r1-b.r0+1;if(b.r1+1>15)return t
 let TWI=0;
 function twState(o){
  if(Array.isArray(o.mut)){let ch=false;o.mut.forEach((m,t)=>{if(!!U.mute[t]!==!!m){U.mute[t]=m?1:0;ch=true}});if(ch&&U.view=="phrase")paintHead()}
- if(o.abB!=null&&o.abB!==ABB&&document.activeElement!==$("#abB")){ABB=o.abB;buildAb()}
+ if(o.abB!=null&&o.abB!==ABB&&document.activeElement!==$("#abB")&&document.activeElement!==$("#abB2")){ABB=o.abB;buildAb()}
  if(o.uph!=null&&o.uph!==U.ph){U.ph=o.uph;if(U.view=="phrase")paint()}
  if(o.songp){const p=o.songp;if(p.tv)S.tv=p.tv.slice();if(p.sd)S.sd=p.sd.slice();if(p.sv)S.sv=p.sv.slice();if(p.fx)S.fx={...FXDEF,...p.fx};if(p.ts)S.ts=p.ts.slice();if(p.trt)S.trt=p.trt.slice();if(p.swing!=null){S.swing=+p.swing;$("#swing").value=String(Math.round(S.swing*20)/20)}fxDef();if(!PDOWN){buildTv();if(U.view=="fx")buildFx()}}
  if(o.pp)autoPatch(o.pp);
