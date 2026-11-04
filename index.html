@@ -126,8 +126,15 @@ async function exportSong(name){name=(name||"").trim()||"METAL KAP";const json=s
  try{const dl=window.claude&&window.claude.use?await window.claude.use("downloads"):null;
   if(dl){await dl.save({filename:fn,data:new Blob([json],{type:"application/json"})});fire("toast",{t:"EXPORTÉ : "+fn});return}}catch(e){if(e&&e.code=="declined")return;fire("toast",{t:"EXPORT IMPOSSIBLE ICI"});return}
  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([json],{type:"application/json"}));a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);fire("toast",{t:"EXPORTÉ : "+fn})}
-function importSong(){const i=document.createElement("input");i.type="file";i.accept=".json,.mk2,application/json";i.onchange=async()=>{const f=i.files&&i.files[0];if(!f)return;
- try{const data=JSON.parse(await f.text());if(!data||!data.S)throw 0;const name=f.name.replace(/(\.mk2)?(\.json)?$/i,"");
+// share sheet (Android: WhatsApp, mail, Drive…). Chrome only shares a short list of file types and .json is not on it,
+// so the song goes as text/plain; the name keeps .mk2.json so the Mac still opens it once the .txt is dropped
+async function shareSong(name){name=(name||"").trim()||"METAL KAP";const json=songFile(),base=name.replace(/[\\/:*?"<>|]/g,"_");
+ const tries=[new File([json],base+".mk2.json",{type:"application/json"}),new File([json],base+".mk2.json.txt",{type:"text/plain"})];
+ const f=tries.find(x=>navigator.canShare&&navigator.canShare({files:[x]}));
+ if(!f){fire("toast",{t:"PARTAGE IMPOSSIBLE ICI → EXPORTER"});return exportSong(name)}
+ try{await navigator.share({files:[f],title:name});fire("toast",{t:"PARTAGÉ : "+f.name})}catch(e){if(e&&e.name=="AbortError")return;fire("toast",{t:"PARTAGE RATÉ → EXPORTER"});exportSong(name)}}
+function importSong(){const i=document.createElement("input");i.type="file";i.accept=".json,.mk2,.txt,application/json,text/plain";i.onchange=async()=>{const f=i.files&&i.files[0];if(!f)return;
+ try{const data=JSON.parse(await f.text());if(!data||!data.S)throw 0;const name=f.name.replace(/(\.mk2)?(\.json)?(\.txt)?$/i,"");
   await api("/api/save?kind=song&name="+encodeURIComponent(name),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});fire("toast",{t:SRV?"ENVOYÉ AU MAC : "+name:"GARDÉ DANS LE TÉLÉPHONE : "+name});presetList("song")
   for(let k=0;k<NINS;k++)clearSample(k);smpFromVar(data.smp,null);for(let k=0;k<NINS;k++)fire("sinfo",sinfo(k));delete data.smp;fire("pdata",{kind:"song",name,data})}
  catch(e){fire("toast",{t:"FICHIER ILLISIBLE"})}};i.click()}
@@ -157,7 +164,7 @@ function handle(id,o){o=o||{};
  if(id=="psave")return presetSave(o);if(id=="plist")return presetList(o.kind);if(id=="pload")return presetLoad(o);
  if(id=="pdel"){api("/api/del?kind="+encodeURIComponent(o.kind)+"&name="+encodeURIComponent(o.name),{method:"POST"}).finally(()=>presetList(o.kind));return}
  if(id=="mload"){const i=document.createElement("input");i.type="file";i.accept=".mid,.midi,audio/midi,audio/x-midi";i.onchange=async()=>{const f=i.files&&i.files[0];if(!f)return;let s="";const u=new Uint8Array(await f.arrayBuffer());for(let k=0;k<u.length;k+=32768)s+=String.fromCharCode.apply(null,u.subarray(k,k+32768));fire("mdata",{name:f.name.replace(/\.midi?$/i,""),b64:btoa(s)})};i.click();return}
- if(id=="pexport")return exportSong(o.name);if(id=="pimport")return importSong();
+ if(id=="pexport")return exportSong(o.name);if(id=="pshare")return shareSong(o.name);if(id=="pimport")return importSong();
  if(id=="fs"){try{o.on?document.documentElement.requestFullscreen():document.exitFullscreen()}catch(_){}return}
 }
 // sound kits that ship with the app (synths only, no samples), copied once into the phone library
@@ -1333,7 +1340,9 @@ if(window.MK2PHONE){$("#phbox").hidden=true;document.documentElement.classList.a
  h.innerHTML=window.MK2SRV?"<b>Connecté au Mac</b> : SAUVER envoie le morceau direct dans Ableton. <b>IMPORTER</b> un fichier exporté depuis l'app nomade : il part aussi sur le Mac. <b>Pour emporter un morceau du Mac</b> (le HOKUTO KIT par ex.) : CHARGER, puis EXPORTER, puis dans l'app installée IMPORTER.":"<b>Mode nomade</b> (sans le Mac) : SAUVER garde le morceau dans le téléphone. <b>EXPORTER</b> crée un fichier .mk2.json dans tes téléchargements. De retour à la maison : active le téléphone dans le plugin, scanne le QR, page SAVE / LOAD → <b>IMPORTER</b> → choisis le fichier : il arrive dans Ableton.";
  const ex=document.createElement("button");ex.type="button";ex.className="chip";ex.textContent="EXPORTER LE MORCEAU";ex.onclick=()=>send("pexport",{name:$("#songName").value});
  const im=document.createElement("button");im.type="button";im.className="chip";im.textContent=window.MK2SRV?"IMPORTER → MAC":"IMPORTER UN MORCEAU";im.onclick=()=>send("pimport",{});
- const row=document.createElement("div");row.className="phrow";row.append(ex,im);box.append(h,row);$("#songFiles").before(box)}
+ const row=document.createElement("div");row.className="phrow";
+ if(navigator.share){const sh=document.createElement("button");sh.type="button";sh.className="chip";sh.textContent="ENVOYER (WHATSAPP…)";sh.onclick=()=>send("pshare",{name:$("#songName").value});row.append(sh)}
+ row.append(ex,im);box.append(h,row);$("#songFiles").before(box)}
 
 // ---------- phone keypad: a fake keyboard under the tracker, it changes with the column (piano / hex / commands)
 const KBI={};Object.entries(KB).forEach(([k,v])=>{if(!(v in KBI)&&k!=","&&k!="q")KBI[v]=k});KBI[12]="q";
