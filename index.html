@@ -773,7 +773,7 @@ const grid=$("#grid");let cells=[];
 function buildGrid(){grid.innerHTML="";
  const th=document.createElement("div");th.className="r th";th.appendChild(document.createElement("span"));
  for(let l=0;l<4;l++){const w=document.createElement("div");w.className="thd";w.style.gridColumn="span 5";
-  const b=document.createElement("button");b.type="button";b.className="tname t"+l;b.title="Clic = couper / remettre la piste";b.onclick=()=>{const tr=U.bank*4+l;U.mute[tr]^=1;send("tw",{k:"m"+tr,v:U.mute[tr]});paintHead()};
+  const b=document.createElement("button");b.type="button";b.className="tname t"+l;b.title="Clic = couper / remettre la piste (automatable dans Ableton : Mute T1 à T8)";b.onclick=()=>{const tr=U.bank*4+l;U.mute[tr]^=1;send("tw",{k:"m"+tr,v:U.mute[tr]});paintHead()};
   const g=document.createElement("button");g.type="button";g.className="tgo";g.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M1 10 C3 2 5 2 7 7 C9 12 11 12 13 4" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
   g.onclick=()=>{const tr=U.bank*4+l,inf=trackInfo(tr);openSynth(inf?inf.ins:DEFI[tr],tr)};w.append(b,g);th.appendChild(w)}
  const dl=document.createElement("span");dl.className="tname dr";dl.textContent="DRUMS";dl.style.gridColumn="span 6";th.appendChild(dl);grid.appendChild(th);
