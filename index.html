@@ -1280,7 +1280,12 @@ function blkKey(k,sh){
 // ---------- A/B: one button (screen or controller) swaps the playing phrase for phrase B, and back
 function buildAb(){const b=$("#abB"),q=$("#abQ");if(!b.options.length)for(let i=0;i<16;i++){const o=document.createElement("option");o.value=i;o.textContent="B = "+hx(i,2);b.appendChild(o)}b.value=String(ABB);q.value=String(ABQ);paintAb()}
 function paintAb(){const t=$("#abT");t.classList.toggle("on",ABON>=0);t.textContent=ABON>=0?"▶ B":"A / B"}
-$("#abT").onclick=()=>send("tw",{k:"ab",v:ABON>=0?0:1});$("#abB").onchange=e=>{ABB=+e.target.value;sendUi()};$("#abQ").onchange=e=>{ABQ=+e.target.value;sendUi()};
+// tap = switch (stays on B until the next tap), hold (more than 0.35 s) = B only while the button is down
+{const t=$("#abT");let dn=0,t0=0,was=-1;
+ t.addEventListener("pointerdown",e=>{e.preventDefault();try{t.setPointerCapture(e.pointerId)}catch(_){}dn=1;t0=performance.now();was=ABON;send("tw",{k:"ab",v:ABON>=0?0:1})});
+ const up=()=>{if(!dn)return;dn=0;if(was<0&&performance.now()-t0>350)send("tw",{k:"ab",v:0})};
+ t.addEventListener("pointerup",up);t.addEventListener("pointercancel",up);t.addEventListener("click",e=>e.preventDefault())}
+$("#abB").onchange=e=>{ABB=+e.target.value;sendUi()};$("#abQ").onchange=e=>{ABQ=+e.target.value;sendUi()};
 
 // ---------- expressive lights: headers breathe with the real level, the filter darkens / brightens the touched tracks,
 // tracks under an active twist glow, kicks (and low basses) shake the grid
