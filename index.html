@@ -1401,6 +1401,7 @@ function rollDraw(){const cv=$("#rollCv");const dpr=Math.min(2,window.devicePixe
  // octaves + beats
  g.font=Math.round((WB?11:16)*dpr)+"px "+RF;for(let p=Math.ceil(lo/12)*12;p<hi;p+=12){const y=q(Y(p));g.fillStyle=WB?"rgba(255,255,255,.35)":"rgba(255,255,255,.10)";for(let x=0;x<W;x+=PX*3)g.fillRect(x,y,PX,1*dpr);g.fillStyle="rgba(255,255,255,.45)";g.fillText(nName(p).replace("-",""),PX,y-PX)}
  for(let r=0;r<=16;r+=4){g.fillStyle=WB?(r%16?"rgba(0,0,34,.35)":"rgba(255,255,255,.4)"):r%16?"rgba(255,255,255,.06)":"rgba(255,255,255,.15)";g.fillRect(q(X(r)),TOP,Math.max(1,dpr),HH+DR)}
+ if(ROLL.q){g.fillStyle=WB?"rgba(255,154,31,.35)":"rgba(255,255,255,.12)";for(let i=0;i<96;i+=ROLL.q){const x=q(X(i/6));for(let y=TOP;y<TOP+HH;y+=PX*2)g.fillRect(x,y,Math.max(1,dpr),PX)}}
  if(ROLL.style!="pixel"){laserDraw(g,{W,H,TOP,HH,lo,hi,dpr,ph,rows,X,Y,now});}else{
  // written notes: coloured bars, slides as ramps, arps as dotted ladders
  for(let tr=NT-1;tr>=0;tr--){const inf=trackInfo(tr,ph);if(!inf)continue;const col=regColor(inf.avg),dim=U.mute[tr]?.12:1;let cur=null;
@@ -1440,8 +1441,11 @@ function baseLine(tr,ph){const rows=S.ph[ph],out=new Array(96).fill(null);let cu
   let end=6;if(d.c=="KIL"&&cur!=null)end=Math.min(6,d.x|0);for(let k=0;k<6;k++)out[r*6+k]=cur!=null&&k<end?cur:null;if(d.c=="KIL")cur=null}return out}
 function rollPick(e){const cv=$("#rollCv"),G=ROLL.g;if(!G)return null;const rc=cv.getBoundingClientRect(),x=(e.clientX-rc.left)*G.dpr,y=(e.clientY-rc.top)*G.dpr;
  const i=Math.max(0,Math.min(95,Math.floor(x/G.W*96))),p=G.lo+(G.TOP+G.HH-y)/G.HH*(G.hi-G.lo);return{i,p}}
-function rollPaint(a,b,ph){const tr=ROLL.et,base=baseLine(tr,ph),rows=S.ph[ph];const i0=Math.min(a.i,b.i),i1=Math.max(a.i,b.i);
- for(let i=i0;i<=i1;i++){if(base[i]==null)continue;const d=rows[i/6|0].t[tr];const t=i1==i0?1:(i-a.i)/(b.i-a.i);let p=a.p+(b.p-a.p)*Math.max(0,Math.min(1,t));
+// time grid: the curve holds one pitch per step of q ticks (3 = half a row, 6 = a row, 12 = 2 rows…), so it moves in a rhythmic staircase
+const RQ=[[0,"GRILLE : LIBRE"],[3,"GRILLE : ½ LIGNE"],[6,"GRILLE : 1 LIGNE"],[12,"GRILLE : 2 LIGNES"],[18,"GRILLE : 3 LIGNES"],[24,"GRILLE : 4 LIGNES"]];ROLL.q=0;
+function rollPaint(a,b,ph){const tr=ROLL.et,base=baseLine(tr,ph),rows=S.ph[ph],q=ROLL.q|0;let i0=Math.min(a.i,b.i),i1=Math.max(a.i,b.i);
+ if(q){i0=Math.floor(i0/q)*q;i1=Math.min(95,Math.floor(i1/q)*q+q-1)}
+ for(let i=i0;i<=i1;i++){if(base[i]==null)continue;const d=rows[i/6|0].t[tr];const ii=q?Math.max(Math.min(a.i,b.i),Math.min(Math.max(a.i,b.i),Math.floor(i/q)*q)):i;const t=b.i==a.i?1:(ii-a.i)/(b.i-a.i);let p=a.p+(b.p-a.p)*Math.max(0,Math.min(1,t));
   if(ROLL.tool=="erase"||ROLL.erasing){if(d.b){d.b[i%6]=0;if(d.b.every(v=>Math.abs(v)<.001))delete d.b}continue}
   if(ROLL.mag==1)p=Math.round(p);else if(ROLL.mag==2)p=snapSc(p);const v=Math.max(-24,Math.min(24,Math.round((p-base[i])*20)/20));if(!d.b)d.b=[0,0,0,0,0,0];d.b[i%6]=v}}
 {const cv=$("#rollCv");cv.style.cursor="crosshair";cv.style.touchAction="none";
@@ -1454,10 +1458,11 @@ function buildRollBar(){const el=$("#rollBar");el.innerHTML="";const lab=documen
  for(let tr=0;tr<NT;tr++){const b=document.createElement("button");b.type="button";b.className="chip"+(tr===ROLL.et?" on":"");b.textContent="T"+(tr+1);const inf=trackInfo(tr,ROLL.g?ROLL.g.ph:U.ph);if(inf)b.style.borderColor=regColor(inf.avg);b.onclick=()=>{ROLL.et=tr;buildRollBar()};el.appendChild(b)}
  const t=document.createElement("button");t.type="button";t.className="chip"+(ROLL.tool=="erase"?" on":"");t.textContent=ROLL.tool=="erase"?"GOMME":"CRAYON";t.onclick=()=>{ROLL.tool=ROLL.tool=="erase"?"pen":"erase";buildRollBar()};
  const m=document.createElement("button");m.type="button";m.className="chip"+(ROLL.mag?" on":"");m.textContent=["PITCH LIBRE","AIMANT DEMI-TONS","ESCALIER GAMME"][ROLL.mag|0];m.title="LIBRE : la courbe suit ton doigt au centième de ton près · DEMI-TONS : elle se colle sur les demi-tons · GAMME : elle monte et descend en escalier sur les notes de la gamme ("+(S.scale>=0?SCL[S.scale][0]:"mineure, le morceau est en LIBRE")+")";m.onclick=()=>{ROLL.mag=((ROLL.mag|0)+1)%3;buildRollBar()};
+ const gq=document.createElement("button");gq.type="button";gq.className="chip"+(ROLL.q?" on":"");gq.textContent=(RQ.find(x=>x[0]==ROLL.q)||RQ[0])[1];gq.title="Quantifie la courbe dans le temps : une seule hauteur par pas de ½, 1, 2, 3 ou 4 lignes. Avec ESCALIER GAMME, ça fait des marches qui tombent en rythme et dans la gamme.";gq.onclick=()=>{const k=RQ.findIndex(x=>x[0]==ROLL.q);ROLL.q=RQ[(k+1)%RQ.length][0];buildRollBar()};
  const sty=document.createElement("button");sty.type="button";sty.className="chip"+(ROLL.style!="pixel"?" on":"");sty.textContent=ROLL.style!="pixel"?"LASER":"PIXEL";sty.title="Lignes laser fines et précises, ou gros pixels rétro";sty.onclick=()=>{ROLL.style=ROLL.style=="pixel"?"laser":"pixel";buildRollBar()};
  const c=document.createElement("button");c.type="button";c.className="chip";c.textContent="EFFACER LA PISTE";c.onclick=()=>{const ph=ROLL.g?ROLL.g.ph:U.ph;snapUndo("COURBES",ph);S.ph[ph].forEach(R=>{delete R.t[ROLL.et].b;delete R.t[ROLL.et].g});if(ph===U.ph)paint();else save();toast("COURBES DE T"+(ROLL.et+1)+" EFFACÉES")};
  const u=document.createElement("button");u.type="button";u.className="chip";u.textContent="↶";u.setAttribute("aria-label","Annuler");u.onclick=()=>$("#undo").click();
- el.append(t,m,sty,c,u)}
+ el.append(t,m,gq,sty,c,u)}
 // ---------- go
 function boot(o){
  const u=o&&o.ui||{};if(u.twister!=null)TWI=u.twister|0;if(u.shake!=null)SHK=u.shake|0;if(u.abB!=null)ABB=u.abB|0;if(u.abQ!=null)ABQ=u.abQ|0;if(u.skipIntro){SKIPI=1;$("#skipIntro").checked=true;introDone=true;$("#intro").hidden=true}if(u.mask!=null)MASK=u.mask|0;if(u.stairRate!=null)STR=u.stairRate|0;if(u.stairSkip!=null)STS=u.stairSkip|0||1;if(u.root!=null)ROOT=u.root|0;if(u.pscale!=null)PSCALE=u.pscale|0;if(u.pad)PADM={...PADDEF,...u.pad};if(Array.isArray(u.slots)&&u.slots.length==4)SLOTS=u.slots.map((x,i)=>STY[x.t]?{t:x.t,p:x.p|0}:{...SLOTDEF[i]});if(u.step!=null)STEP=u.step|0;if(u.skin){skinSet(u.skin)}if(u.help!=null)helpSet(u.help);if(u.chain)mode="chain";if(u.ph!=null)U.ph=u.ph|0;if(u.prate!=null)prate=u.prate|0;if(u.oct!=null)U.oct=u.oct|0;
