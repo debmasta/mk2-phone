@@ -546,12 +546,96 @@ body.dropok .smpbox,body.dropok .thd{outline:2px dashed var(--acc2);outline-offs
 :root.focus #v-phrase{position:fixed;inset:22px;z-index:61;display:flex;flex-direction:column;gap:10px;padding:14px 18px 18px;overflow:hidden;
  background:linear-gradient(180deg,rgba(6,16,44,.78),rgba(2,6,20,.70));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
  border:1px solid rgba(141,243,255,.35);border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.04) inset,0 0 40px rgba(141,243,255,.08)}
-:root.focus #v-phrase>.hint,:root.focus #v-phrase .jp,:root.focus #v-phrase .tools>*:not(#bank){display:none!important}
+:root.focus #v-phrase>.hint,:root.focus #v-phrase .jp,:root.focus #v-phrase .tools>*:not(#bank):not(.hg:first-child){display:none!important}
 :root.focus #v-phrase .tools{justify-content:flex-start}
 :root.focus #v-phrase .ttl{flex:none}
 :root.focus #v-phrase .grid{flex:none;margin:auto;background:rgba(0,6,22,.55)!important;border-color:rgba(141,243,255,.3);box-shadow:0 10px 40px rgba(0,0,0,.5);overflow:auto;max-width:100%}
 :root.focus #focus{background:var(--wO,var(--acc));color:#000}
 @media (max-width:700px){:root.focus #v-phrase{inset:6px;padding:8px}}
+
+/* ===== WORKBENCH 2: the real Amiga objects (screen title bar, windows with gadgets, grouped controls), clearer type ===== */
+:root[data-skin="wb"]{--wbG:repeating-linear-gradient(0deg,var(--wW) 0 2px,transparent 2px 4px)}
+/* screen title bar, like the top of the Workbench screen: what is going on, always readable */
+:root[data-skin="wb"] .scrbar{display:flex;align-items:center;gap:18px;height:22px;padding:0 0 0 10px;background:var(--wW);color:var(--wB);font:700 11px/22px var(--mono);letter-spacing:.06em;border-bottom:2px solid var(--wK);white-space:nowrap;overflow:hidden}
+.scrbar{display:none}
+:root[data-skin="wb"] .scrbar .scl{font-family:'KapTopaz',monospace;font-weight:400;font-size:11px}
+:root[data-skin="wb"] .scrbar .scs{flex:1;overflow:hidden;text-overflow:ellipsis}
+:root[data-skin="wb"] .scrbar .scs b{background:var(--wO);color:var(--wK);padding:0 5px}
+:root[data-skin="wb"] .scrbar .scm{color:var(--wB);opacity:.75}
+:root[data-skin="wb"] .scrbar .dg{width:46px;height:22px;border-left:2px solid var(--wK);background:
+ linear-gradient(var(--wW),var(--wW)) 9px 5px/14px 9px no-repeat,linear-gradient(var(--wK),var(--wK)) 7px 3px/18px 13px no-repeat,
+ linear-gradient(var(--wB),var(--wB)) 21px 8px/16px 10px no-repeat,linear-gradient(var(--wK),var(--wK)) 19px 6px/20px 14px no-repeat,var(--wW)}
+/* header: controls in named boxes (engraved frame + label), like Amiga prefs windows */
+:root[data-skin="wb"] header{padding-top:4px}
+:root[data-skin="wb"] .hbar{gap:8px;padding:14px 10px 8px;align-items:stretch;flex-wrap:wrap}
+:root[data-skin="wb"] header .logo{min-width:0;padding:10px 16px}:root[data-skin="wb"] header .logo b{font-size:22px}
+:root[data-skin="wb"] .hg .play{width:40px;height:40px}:root[data-skin="wb"] .hg #padst span{display:none}
+.win select{max-width:100%;width:100%}
+:root[data-skin="wb"] .hg{position:relative;display:flex;align-items:center;gap:6px;padding:12px 8px 7px;border:2px solid;border-color:var(--wK) var(--wW) var(--wW) var(--wK);outline:0}
+:root[data-skin="wb"] .hg>.lg{position:absolute;top:-8px;left:8px;padding:0 5px;background:var(--wB);color:var(--wD);font:700 10px/14px var(--mono);letter-spacing:.16em}
+:root[data-skin="wb"] .hg .stat{border:0;padding:0 6px}
+:root[data-skin="wb"] .hg .stat span{font-size:10px;letter-spacing:.14em;color:var(--wD)}
+:root[data-skin="wb"] .hg .stat input{font-size:18px}
+:root[data-skin="wb"] .hg .chip{height:32px;padding:0 10px;font-size:11px;letter-spacing:.08em}
+:root[data-skin="wb"] .hg #ledAmt{width:70px}
+:root[data-skin="wb"] .hbar>.sp{flex:1}
+/* windows: every title bar is a Workbench drag bar (stripes) with a depth gadget at the end */
+:root[data-skin="wb"] .ttl{position:relative;gap:10px;padding:4px 50px 4px 0;background:var(--wbG) 0 50%/100% 14px no-repeat}
+:root[data-skin="wb"] .ttl>*{position:relative;background:var(--wB)}
+:root[data-skin="wb"] .ttl h1{padding:2px 12px 0 6px}
+:root[data-skin="wb"] .ttl .rule{flex:1;min-width:20px;border:0;background:transparent!important}
+:root[data-skin="wb"] .ttl::after{content:"";position:absolute;right:0;top:50%;transform:translateY(-50%);width:40px;height:24px;border:2px solid;border-color:var(--wW) var(--wK) var(--wK) var(--wW);background:
+ linear-gradient(var(--wW),var(--wW)) 7px 4px/14px 9px no-repeat,linear-gradient(var(--wK),var(--wK)) 5px 2px/18px 13px no-repeat,
+ linear-gradient(var(--wB),var(--wB)) 17px 9px/14px 9px no-repeat,linear-gradient(var(--wK),var(--wK)) 15px 7px/18px 13px no-repeat,var(--wB)}
+:root[data-skin="wb"] .win{position:relative;border:2px solid;border-color:var(--wW) var(--wK) var(--wK) var(--wW);background:var(--wB2);padding:0 10px 10px;min-width:0}
+:root[data-skin="wb"] .wt{display:flex;align-items:center;gap:8px;height:20px;margin:0 -10px 10px;padding:0 0 0 24px;background:var(--wbG) 0 50%/100% 12px no-repeat;position:relative}
+:root[data-skin="wb"] .wt::before{content:"";position:absolute;left:3px;top:2px;width:16px;height:14px;border:2px solid;border-color:var(--wW) var(--wK) var(--wK) var(--wW);background:linear-gradient(var(--wW),var(--wW)) center/6px 6px no-repeat,var(--wB2)}
+:root[data-skin="wb"] .wt b{background:var(--wB2);color:var(--wW);padding:0 6px;font:700 11px/20px var(--mono);letter-spacing:.16em}
+/* tracker tools: same named boxes */
+:root[data-skin="wb"] .tools{gap:14px 10px;margin:12px 0 6px}
+:root[data-skin="wb"] .tools .hg{padding:12px 8px 6px;flex-wrap:wrap}
+:root[data-skin="wb"] .tools .chip{height:30px;font-size:11px}
+:root[data-skin="wb"] .tools .swl{font-size:10px;letter-spacing:.12em;color:var(--wD)}
+/* type: labels small and calm, values big and bright */
+:root[data-skin="wb"] .pnl label{font-size:10px;letter-spacing:.14em;color:var(--wD);gap:8px}
+:root[data-skin="wb"] .pnl label output{font-size:14px;color:var(--wW);min-width:54px}
+:root[data-skin="wb"] .hint{font-size:11px;line-height:1.6;color:var(--wD);font-weight:400}
+:root[data-skin="wb"] nav button b{font-size:13px;letter-spacing:.1em}
+/* SYNTH: modules like a hardware panel */
+:root[data-skin="wb"] .pnl.wins{display:block}
+.wgrid{display:grid;grid-template-columns:1fr 1fr 1.6fr .9fr;gap:10px;margin-bottom:10px}
+@media (max-width:1100px){.wgrid{grid-template-columns:1fr 1fr}}
+@media (max-width:600px){.wgrid{grid-template-columns:1fr}}
+.win>label{padding:6px 0!important;border:0!important;background:transparent!important}
+.win>label+label{border-top:1px dashed var(--wE)!important}
+.win .adsrcv{display:block;margin:0 0 6px;height:120px}
+/* twists panel folds away (gadget in its title) */
+.agad{float:right;width:26px;height:22px;padding:0;font-size:12px!important;line-height:1}
+.app.asc aside{width:44px;padding:10px 6px;overflow:hidden}
+.app.asc aside>*:not(h2){display:none!important}
+.app.asc aside h2{writing-mode:vertical-rl;transform:rotate(180deg);display:flex;align-items:center;gap:10px;white-space:nowrap}
+.app.asc aside h2 .agad{float:none;transform:rotate(180deg)}
+/* side bits in the skin: mini tracker, plate, nav decorations */
+:root[data-skin="wb"] .mini{background:var(--wG);border:2px solid;border-color:var(--wK) var(--wW) var(--wW) var(--wK)}
+:root[data-skin="wb"] .mini .mhd,:root[data-skin="wb"] .mini .mft{color:var(--wD)}
+:root[data-skin="wb"] nav::before,:root[data-skin="wb"] nav::after,:root[data-skin="wb"] nav button::after{display:none}
+:root[data-skin="wb"] .plate{border:2px solid;border-color:var(--wW) var(--wK) var(--wK) var(--wW);color:var(--wD)}
+:root[data-skin="wb"] #rollCv{border:2px solid;border-color:var(--wK) var(--wW) var(--wW) var(--wK)!important}
+/* drums lanes and fx boxes as windows */
+:root[data-skin="wb"] .dlane,:root[data-skin="wb"] .fxbox{border:2px solid;border-color:var(--wW) var(--wK) var(--wK) var(--wW);background:var(--wB2);padding:0 10px 10px}
+:root[data-skin="wb"] .fxbox h3.wt{margin:0 -10px 6px;letter-spacing:0}
+:root[data-skin="wb"] .dlane .dlh{margin:0 -10px 8px;padding:4px 8px 4px 28px;background:var(--wbG) 0 50%/100% 12px no-repeat;position:relative}
+:root[data-skin="wb"] .dlane .dlh::before{content:"";position:absolute;left:4px;top:50%;transform:translateY(-50%);width:16px;height:14px;border:2px solid;border-color:var(--wW) var(--wK) var(--wK) var(--wW);background:linear-gradient(var(--wW),var(--wW)) center/6px 6px no-repeat,var(--wB2)}
+:root[data-skin="wb"] .dlane .dlh{flex-wrap:nowrap}:root[data-skin="wb"] .dlane .dlh select{min-width:0;max-width:210px;flex:1 1 auto}
+:root[data-skin="wb"] .dlane .dlh b{background:var(--wB2);padding:0 8px;font-family:'KapTopaz',monospace;font-weight:400;font-size:22px}
+/* phone: the header is one line that scrolls sideways, the name is in the screen bar */
+@media (max-width:700px){:root[data-skin="wb"] header .logo{display:none}:root[data-skin="wb"] .hbar{flex-wrap:nowrap;overflow-x:auto;padding:12px 8px 6px;gap:6px;scrollbar-width:none}
+ :root[data-skin="wb"] .hbar>.sp{display:none}:root[data-skin="wb"] .hg{flex:none}:root[data-skin="wb"] .scrbar .scm{display:none}:root[data-skin="wb"] .hg .chip{height:30px;padding:0 7px}}
+/* PAD: a drawing of the pad, so the page is never empty */
+.padart{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:6px 0 10px}
+.padart svg{width:300px;max-width:100%;height:auto}
+.padart .pst{font:700 12px/1.6 var(--mono);color:var(--wD,var(--dim))}
+.padart .pst b{color:var(--wO,var(--acc))}
 </style>
 </head>
 <body>
@@ -1487,13 +1571,13 @@ function miniDraw(){const cv=$("#miniC");if(!cv||U.view=="phrase")return;const p
  const tx=t=>2+t*(MC.tw+MC.tg),dx=l=>2+8*(MC.tw+MC.tg)+MC.gap+l*(MC.dw+1),ry=r=>MC.top+r*(MC.rh+1);
  const on=twActive();
  // level meters on top, glowing when a live twist touches the track
- for(let t=0;t<8;t++){const a=Math.min(1,Math.sqrt((P.amp||[])[t]||0)*1.3),hit=(MASK>>t)&1;g.fillStyle="#141c26";g.fillRect(tx(t),1,MC.tw,4);
+ for(let t=0;t<8;t++){const a=Math.min(1,Math.sqrt((P.amp||[])[t]||0)*1.3),hit=(MASK>>t)&1;g.fillStyle=(getComputedStyle(document.documentElement).getPropertyValue("--wG2").trim()||"#141c26");g.fillRect(tx(t),1,MC.tw,4);
   if(a>.02){g.fillStyle=liveCol(t)||acc;g.globalAlpha=.35+a*.65;g.fillRect(tx(t),1,Math.max(1,MC.tw*a),4);g.globalAlpha=1}if(on&&hit){g.fillStyle=acc2;g.fillRect(tx(t),5,MC.tw,1)}}
  for(let r=0;r<16;r++){const R=rows[r],y=ry(r),now=P.run&&P.playPh===ph&&P.playRow===r;
   g.fillStyle=now?"#1f3a4a":r%4==0?"#0f1620":"#0a0f16";g.fillRect(1,y-0.5,138,MC.rh+1);
   for(let t=0;t<8;t++){const d=R.t[t],x=tx(t);
    if(d.n>=0){g.fillStyle=regColor(snap(d.n));g.globalAlpha=(d.v<0?1:.35+d.v/15*.65)*(U.mute[t]?.25:1);g.fillRect(x,y,MC.tw,MC.rh);g.globalAlpha=1;if(snap(d.n)<46){g.fillStyle="rgba(0,0,0,.35)";g.fillRect(x,y+MC.rh-2,MC.tw,2)}}
-   else if(d.n===-2){g.fillStyle="#3a4a5a";g.fillRect(x+2,y+MC.rh/2-.5,MC.tw-4,1)}
+   else if(d.n===-2){g.fillStyle=(getComputedStyle(document.documentElement).getPropertyValue("--wE").trim()||"#3a4a5a");g.fillRect(x+2,y+MC.rh/2-.5,MC.tw-4,1)}
    else{g.fillStyle="#121a24";g.fillRect(x+MC.tw/2-.5,y+MC.rh/2-.5,1,1)}
    if(d.c){g.fillStyle=acc2;g.fillRect(x+MC.tw-3,y,3,3)}}
   for(let l=0;l<5;l++){const x=dx(l);if(R[DK[l]]){g.fillStyle=l==0?"#ff5a3c":acc;g.fillRect(x,y+1,MC.dw,MC.rh-2)}else{g.fillStyle="#121a24";g.fillRect(x+MC.dw/2-.5,y+MC.rh/2-.5,1,1)}}
@@ -1689,7 +1773,50 @@ const paintAmiga=()=>{if(la&&document.activeElement!==la)la.value=LEDA;if(la)la.
 if(la)la.addEventListener("input",()=>{LEDA=+la.value;send("p",{ledamt:LEDA});paintAmiga()});
 if(v4)v4.onclick=()=>{V4=V4?0:1;send("p",{v4:V4});paintAmiga()};
 window.amigaP=p=>{if(p.ledamt!=null)LEDA=+p.ledamt;if(p.v4!=null)V4=p.v4>.5?1:0;paintAmiga()};paintAmiga();
+// ===== WORKBENCH 2: screen title bar, controls grouped in named boxes, window gadgets, folding twists, synth modules
+(function wb2(){
+ const mk=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+ const box=(lab,items)=>{const g=mk("div","hg");g.appendChild(mk("span","lg",lab));items.forEach(x=>{if(x)g.appendChild(x)});return g};
+ const P_=id=>{const x=$(id);return x&&x.closest("label.swl")||x};
+ // the screen title bar: live state in one line
+ const app=$(".app");if(app&&!$("#scrbar")){const b=mk("div","scrbar");b.id="scrbar";b.setAttribute("aria-live","off");b.innerHTML='<span class="scl">METAL KAP 2</span><span class="scs" id="scrSt"></span><span class="scm" id="scrMem"></span><span class="dg" aria-hidden="true"></span>';app.prepend(b)}
+ const on=id=>{const x=$(id);return x&&x.classList.contains("on")};
+ const tick=()=>{const st=$("#scrSt");if(!st)return;const run=P.run,ph=run&&P.playPh>=0?P.playPh:U.ph,mode=$("#mode")?$("#mode").textContent:"";
+  st.innerHTML=(run?"<b>▶ LECTURE</b>":"■ STOP")+" · PHRASE "+hx(ph,2)+(run&&P.playRow>=0?" · LIGNE "+hx(P.playRow,2):"")+" · "+(S.bpm||"")+" BPM · "+mode+(on("#paula")?" · PAULA "+($("#prate")?$("#prate").textContent:""):"")+(on("#v4")?" · 4 VOIX":"")+(S.grvA>0?" · GROOVE "+Math.round(S.grvA*100)+"%":"")+(document.documentElement.classList.contains("focus")?" · FOCUS":"");
+  const m=$("#scrMem");if(m)m.textContent="CHIP MEM 512K · "+S.ins.filter(I=>I.wave=="sample").length+" SAMPLES"};
+ setInterval(tick,250);tick();
+ // header
+ const hb=$(".hbar");if(hb&&!hb.querySelector(".hg")){const stats=[...hb.querySelectorAll(":scope>.stat")];
+  const g1=box("LECTURE",[$("#play"),...stats]),g2=box("PUCE AMIGA",["#paula","#prate","#pdrv","#led","#ledAmt","#v4"].map(i=>$(i))),g3=box("MASTER",[$("#raw"),$("#luff")]),g4=box("ÉCRAN",[$("#skin"),$("#help"),$("#fsBtn"),$("#padst")]);
+  const sp=mk("div","sp");hb.replaceChildren(g1,g2,g3,sp,g4)}
+ // tracker tools
+ const tl=$("#v-phrase .tools");if(tl&&!tl.querySelector(".hg")){const ab=tl.querySelector(".abx");
+  const g=[box("PISTES",[$("#bank")]),box("ÉDITION",[$("#rec"),$("#step"),$("#undo"),$("#phCopy"),$("#phPaste"),$("#phClear")]),box("MORCEAU",[P_("#skey"),P_("#sscale"),P_("#swing"),P_("#grvA")]),
+   box("LIVE",[ab,$("#shk"),$("#recfx")]),box("VARIATION",[$("#mutate"),P_("#mutTr"),P_("#mutLvl")])];
+  tl.replaceChildren(...g)}
+ // twists fold away
+ const ah=$("aside h2");if(ah&&!$("#agad")){const b=mk("button","chip agad","◂");b.type="button";b.id="agad";b.title="Replier / déplier les twists et le mix";ah.appendChild(b);
+  const set=v=>{app.classList.toggle("asc",v);b.textContent=v?"▸":"◂";try{localStorage.setItem("mk2Asc",v?"1":"")}catch(_){}setTimeout(()=>{window.dispatchEvent(new Event("resize"))},0)};
+  b.onclick=e=>{e.stopPropagation();set(!app.classList.contains("asc"))};let v0=false;try{v0=!!localStorage.getItem("mk2Asc")}catch(_){}set(v0)}
+ // PAD page: a drawing of the pad and its state
+ const pad=$("#v-pad");if(pad&&!pad.querySelector(".padart")){const a=mk("div","padart");a.innerHTML='<svg viewBox="0 0 300 170" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="3" style="color:var(--wW,#fff)"><path d="M70 30 H230 C270 30 292 80 296 120 C300 160 266 172 246 150 L214 116 H86 L54 150 C34 172 0 160 4 120 C8 80 30 30 70 30 Z"/><circle cx="92" cy="74" r="18"/><circle cx="92" cy="74" r="6" fill="currentColor"/><circle cx="182" cy="108" r="16"/><circle cx="182" cy="108" r="5" fill="currentColor"/><path d="M110 102 h12 v-12 h10 v12 h12 v10 h-12 v12 h-10 v-12 h-12 z"/><circle cx="226" cy="58" r="8"/><circle cx="244" cy="76" r="8"/><circle cx="208" cy="76" r="8"/><circle cx="226" cy="94" r="8"/><path d="M60 22 h40 M200 22 h40" stroke-width="6"/><text x="222" y="62" font-size="10" fill="currentColor" stroke="none">Y</text><text x="240" y="80" font-size="10" fill="currentColor" stroke="none">B</text><text x="204" y="80" font-size="10" fill="currentColor" stroke="none">X</text><text x="222" y="98" font-size="10" fill="currentColor" stroke="none">A</text><text x="64" y="16" font-size="10" fill="currentColor" stroke="none">LB · LT</text><text x="204" y="16" font-size="10" fill="currentColor" stroke="none">RB · RT</text></svg><div class="pst" id="padArtSt"></div>';
+  const map=$("#padmap");pad.insertBefore(a,map);
+  const ps=()=>{const t=$("#padst")?$("#padst").textContent.trim():"";$("#padArtSt").innerHTML=(/\?|aucune|pas/i.test(t)||!t?"<b>Pas de manette détectée.</b><br>Branche une manette Xbox en USB ou en Bluetooth :<br>le plugin la lit même fenêtre fermée.":"<b>Manette connectée.</b><br>")+"<br>En dessous : ce que fait chaque bouton (tu choisis)."};
+  setInterval(ps,1000);ps()}
+ $$(".fxbox h3").forEach(h=>{if(!h.classList.contains("wt")){h.classList.add("wt");h.innerHTML="<b>"+h.innerHTML+"</b>"}});
+ try{buildPad()}catch(_){}
+ // SYNTH: modules OSC / FILTRE / ENVELOPPE / AMPLI
+ const _b=buildIns;buildIns=function(){_b.apply(this,arguments);try{synthWins()}catch(e){console.error(e)}};
+ function synthWins(){const p=$("#insPnl");if(!p||p.classList.contains("wins")&&p.querySelector(".wgrid"))return;const kids=[...p.children];
+  const key=el=>{const r=el.querySelector&&el.querySelector("input[type=range]");if(r&&r._k)return r._k;if(el.classList.contains("adsrcv"))return "adsr";if(el.classList.contains("smpbox"))return "smp";if(el.tagName=="LABEL"&&el.querySelector("select"))return "wave";return "x"};
+  const G=[["OSCILLATEUR",["wave","voices","det","mod"]],["FILTRE",["cut","res","env"]],["ENVELOPPE",["adsr","a","d","s","r"]],["AMPLI",["vol","crush"]]],used=new Set(),grid=mk("div","wgrid");
+  for(const [t,ks] of G){const w=mk("div","win");const h=mk("div","wt");h.appendChild(mk("b","",t));w.appendChild(h);ks.forEach(k=>kids.forEach(el=>{if(!used.has(el)&&key(el)==k){used.add(el);w.appendChild(el)}}));grid.appendChild(w)}
+  const rest=kids.filter(el=>!used.has(el));rest.forEach(el=>{if(el.classList&&el.classList.contains("smpbox")){const w=mk("div","win");const h=mk("div","wt");h.appendChild(mk("b","","SAMPLEUR"));w.append(h,el);rest[rest.indexOf(el)]=w}});
+  p.classList.add("wins");p.replaceChildren(grid,...rest);if(typeof ADRAW=="function")setTimeout(ADRAW,0)}
+ if(U.view=="synth")buildIns();
 })();
+})();
+
 
 </script>
 <div id="luffP" class="luffp" hidden></div>
