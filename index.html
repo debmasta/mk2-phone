@@ -570,7 +570,9 @@ body.dropok .smpbox,body.dropok .thd{outline:2px dashed var(--acc2);outline-offs
 :root[data-skin="wb"] .hbar{gap:8px;padding:14px 10px 8px;align-items:stretch;flex-wrap:wrap}
 :root[data-skin="wb"] header .logo{min-width:0;padding:10px 16px}:root[data-skin="wb"] header .logo b{font-size:22px}
 :root[data-skin="wb"] .hg .play{width:40px;height:40px}:root[data-skin="wb"] .hg #padst span{display:none}
-.win select{max-width:100%;width:100%}
+.win>label select{max-width:100%;width:100%}
+:root[data-skin="wb"] input[type=number]{background:var(--wB);color:var(--wW);border:2px solid;border-color:var(--wK) var(--wW) var(--wW) var(--wK);font:700 12px var(--mono);padding:4px 6px;height:30px}
+:root[data-skin="wb"] input[type=number]:disabled{opacity:.45}
 :root[data-skin="wb"] .hg{position:relative;display:flex;align-items:center;gap:6px;padding:12px 8px 7px;border:2px solid;border-color:var(--wK) var(--wW) var(--wW) var(--wK);outline:0}
 :root[data-skin="wb"] .hg>.lg{position:absolute;top:-8px;left:8px;padding:0 5px;background:var(--wB);color:var(--wD);font:700 10px/14px var(--mono);letter-spacing:.16em}
 :root[data-skin="wb"] .hg .stat{border:0;padding:0 6px}
@@ -1813,7 +1815,7 @@ window.amigaP=p=>{if(p.ledamt!=null)LEDA=+p.ledamt;if(p.v4!=null)V4=p.v4>.5?1:0;
  // SYNTH: modules OSC / FILTRE / ENVELOPPE / AMPLI
  const _b=buildIns;buildIns=function(){_b.apply(this,arguments);try{synthWins()}catch(e){console.error(e)}};
  function synthWins(){const p=$("#insPnl");if(!p||p.classList.contains("wins")&&p.querySelector(".wgrid"))return;const kids=[...p.children];
-  const key=el=>{const r=el.querySelector&&el.querySelector("input[type=range]");if(r&&r._k)return r._k;if(el.classList.contains("adsrcv"))return "adsr";if(el.classList.contains("smpbox"))return "smp";if(el.tagName=="LABEL"&&el.querySelector("select"))return "wave";return "x"};
+  const key=el=>{if(el.classList.contains("smpbox"))return "smp";if(el.classList.contains("adsrcv"))return "adsr";const r=el.querySelector&&el.querySelector(":scope>div>input[type=range]");if(r&&r._k)return r._k;if(el.tagName=="LABEL"&&el.querySelector("select"))return "wave";return "x"};
   const G=[["OSCILLATEUR",["wave","voices","det","mod"]],["FILTRE",["cut","res","env"]],["ENVELOPPE",["adsr","a","d","s","r"]],["AMPLI",["vol","crush"]]],used=new Set(),grid=mk("div","wgrid");
   for(const [t,ks] of G){const w=mk("div","win");const h=mk("div","wt");h.appendChild(mk("b","",t));w.appendChild(h);ks.forEach(k=>kids.forEach(el=>{if(!used.has(el)&&key(el)==k){used.add(el);w.appendChild(el)}}));grid.appendChild(w)}
   const rest=kids.filter(el=>!used.has(el));rest.forEach(el=>{if(el.classList&&el.classList.contains("smpbox")){const w=mk("div","win");const h=mk("div","wt");h.appendChild(mk("b","","SAMPLEUR"));w.append(h,el);rest[rest.indexOf(el)]=w}});
