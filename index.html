@@ -1246,6 +1246,9 @@ function bbCompile(src){src=String(src||"");let i=0,err=null,pos=-1;const code=[
   else{const b=st.pop(),x=st.pop();st.push({MUL:"Math.imul("+x+","+b+")",DIV:"D("+x+","+b+")",MOD:"M("+x+","+b+")",ADD:"(("+x+")+("+b+")|0)",SUB:"(("+x+")-("+b+")|0)",SHL:"(("+x+")<<("+b+"))",SHR:"(("+x+")>>("+b+"))",LT:"(+("+x+"<"+b+"))",LE:"(+("+x+"<="+b+"))",GT:"(+("+x+">"+b+"))",GE:"(+("+x+">="+b+"))",EQ:"(+("+x+"==="+b+"))",NE:"(+("+x+"!=="+b+"))",AND:"("+x+"&"+b+")",XOR:"("+x+"^"+b+")",OR:"("+x+"|"+b+")",LAND:"(+(("+x+")!==0&&("+b+")!==0))",LOR:"(+(("+x+")!==0||("+b+")!==0))"}[o])}}
  const D=(x,y)=>y===0||(x===-2147483648&&y===-1)?0:(x/y)|0,M=(x,y)=>y===0||(x===-2147483648&&y===-1)?0:(x%y)|0;
  let f;try{f=new Function("D","M","return (t,v)=>("+st[0]+")|0")(D,M)}catch(e){return{ok:false,err:"formule illisible",pos:0}}return{ok:true,f}}
+let BBPI=0;try{BBPI=+(localStorage.getItem("mk2BbPal")||0)||0}catch(_){}
+const BBPAL=[["THERMIQUE",u=>[Math.min(255,u*510),Math.max(0,u*510-255)*.55,Math.max(0,u*600-480)]],["LAVE",u=>{const a=u*u;return[40+215*Math.min(1,u*1.6),a*140,a*a*90]}],
+ ["ROUGE CRT",(u,q,y)=>{const k=y%2?.55:1;return[(30+225*u)*k,(10+40*u*u)*k,(20+30*u*u)*k]}],["BITS RGB",(u,q)=>[q&0xE0,(q&0x1C)<<3,(q&3)<<6]]];
 const bbVars=I=>"abcdefgh".split("").map(k=>Math.round(+I["b"+k]||0));
 // random formulas: built from the pieces classic bytebeats use, each one heard before you get it (silent, stuck or noise thrown away)
 function bbRandom(){const P=["t*a&t>>b","t>>a|t>>b","t*a","(t>>a|t>>b)&c","t*(t>>a&b)","t>>a&t>>b","t*a>>b","t*(a&t>>b)","(t*a&t>>b)","t>>(t>>a&b)"],J=["|","^","+","&"],R=n=>Math.floor(Math.random()*n);
@@ -1270,14 +1273,17 @@ function bbBox(p,I){if(I.bf==null){I.bf="t*((t>>a|t>>b)&c&t>>d)";Object.assign(I
   if(!C.ok){er.innerHTML="✕ "+C.err+' <span class="bbpos">'+" ".repeat(Math.max(0,C.pos))+"^</span>";er.classList.add("bad");return}
   er.textContent="✓ compile · C4 = 8 kHz · la note règle la vitesse de t, les potards changent les nombres";er.classList.remove("bad");
   // the classic picture: each row 256 steps of t, coloured by the sample
-  const W=256,H=96;cv.width=W;cv.height=H;const g=cv.getContext("2d"),im=g.createImageData(W,H),v=bbVars(I);
-  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const s=C.f(y*256+x,v)&255,o=(y*W+x)*4,u=s/255;im.data[o]=Math.round(40+215*u*u);im.data[o+1]=Math.round(40+200*u);im.data[o+2]=Math.round(120+135*u);im.data[o+3]=255}g.putImageData(im,0,0)};
+  const W=256,H=96;cv.width=W;cv.height=H;const g=cv.getContext("2d"),im=g.createImageData(W,H),v=bbVars(I),A=new Uint8Array(W*H);let lo=255,hi=0;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){const q=C.f(y*256+x,v)&255;A[y*W+x]=q;if(q<lo)lo=q;if(q>hi)hi=q}
+  const sp=Math.max(1,hi-lo),pal=BBPAL[BBPI][1];   // contrast stretched to what the formula really gives
+  for(let k=0;k<W*H;k++){const q=A[k],u=(q-lo)/sp,[r,gg,b]=pal(u,q,(k/W|0)),o=k*4;im.data[o]=r;im.data[o+1]=gg;im.data[o+2]=b;im.data[o+3]=255}g.putImageData(im,0,0);pb.textContent="IMAGE : "+BBPAL[BBPI][0]};
  let ct=0;inp.oninput=()=>{paint();const C=bbCompile(inp.value);if(C.ok){I.bf=inp.value;clearTimeout(ct);ct=setTimeout(save,150)}};
  const vr=document.createElement("div");vr.className="bbvars";
  for(const ch of "abcd"){slider(vr,I,"b"+ch,ch.toUpperCase(),0,255,1,v=>String(Math.round(v)),()=>{paint()});const l=vr.lastChild;if(l)l.style.setProperty("--bbc",BBC[ch])}
  const eh=document.createElement("div");eh.className="pitchrow";const ehl=document.createElement("span");ehl.className="smpn";ehl.textContent="E-H (pas sur les potards) :";eh.appendChild(ehl);
  for(const ch of "efgh"){const n=document.createElement("input");n.type="number";n.min="0";n.max="255";n.value=String(I["b"+ch]||0);n.style.width="64px";n.style.borderColor=BBC[ch];n.title=ch;n.onchange=()=>{I["b"+ch]=Math.max(0,Math.min(255,+n.value|0));save();paint()};const lb=document.createElement("b");lb.textContent=ch;lb.style.color=BBC[ch];eh.append(lb,n)}
  const hl=document.createElement("p");hl.className="smpn";hl.textContent="Formule en C de t (qui compte) et des variables a-h : les 8 bits du bas sont le son. Opérateurs : + - * / % & | ^ ~ << >> < > == != && || ! ?: · Formules classiques de viznut et de la communauté bytebeat (2011), créditées dans la liste.";
+ const pb=document.createElement("button");pb.type="button";pb.className="chip";pb.title="Couleurs de l'image (THERMIQUE, LAVE, ROUGE CRT, BITS RGB)";pb.onclick=()=>{BBPI=(BBPI+1)%BBPAL.length;try{localStorage.setItem("mk2BbPal",String(BBPI))}catch(_){}paint()};top.appendChild(pb);
  box.append(top,inp,col,er,cv,vr,eh,hl);p.appendChild(box);paint()}
 // ---------- the odd engines: chips, 1 bit, maths. Their 4 knobs are A-D (automatable: Ins N Knob A-D)
 const st24=v=>v>0?"+"+Math.round(v/255*24)+" st":"OFF";
