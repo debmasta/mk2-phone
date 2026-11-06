@@ -164,6 +164,8 @@ function handle(id,o){o=o||{};
  if(id=="hit"){audioStart();ex.hit(o.l|0,1);return}
  if(id=="sload")return pickFile(o.slot|0);
  if(id=="sdata"){smpFromVar([o],o.slot|0);return}
+ if(id=="bbget"){let l=[];try{l=JSON.parse(localStorage.getItem("mk2Formules")||"[]")}catch(_){}fire("bblist",{list:l});return}
+ if(id=="bbput"){try{localStorage.setItem("mk2Formules",JSON.stringify(o.list||[]))}catch(_){}return}
  if(id=="sclass"){const slot=o.slot|0;let cls="";if(ex.cls_run&&SMP[slot]){ex.cls_clear();(o.pos||[]).forEach(p=>ex.cls_add(+p));const c=ex.cls_run(slot);for(let k=0;k<c;k++)cls+=String.fromCharCode(ex.cls_at(k))}fire("scls",{slot,key:o.key,cls});return}
  if(id=="sclear"){clearSample(o.slot|0);fire("sinfo",sinfo(o.slot|0));return}
  if(id=="swave")return fire("swv",wavePeaks(o.slot|0,+o.a,+o.b,o.n|0));
@@ -1257,6 +1259,18 @@ function bbRandom(){const P=["t*a&t>>b","t>>a|t>>b","t*a","(t>>a|t>>b)&c","t*(t>
   const C=bbCompile(f);if(!C.ok)continue;const v=[vars.a,vars.b,vars.c,vars.d,0,0,0,0];let sum=0,sq=0,dif=0,last=0,uniq=new Set();
   for(let t=0;t<24000;t+=3){const x=C.f(t,v)&255;sum+=x;sq+=x*x;dif+=Math.abs(x-last);last=x;if(uniq.size<20)uniq.add(x)}
   const N=8000,m=sum/N,va=sq/N-m*m,md=dif/N;if(va<200||uniq.size<6||md>75)continue;return{f,v:vars}}return{f:"t*(t>>5|t>>8)",v:{a:0,b:0,c:0,d:0}}}
+// ---------- MES FORMULES: your own list (file Formules.json next to your songs; on the phone in the app), filled by hand, by pasting, or from a GitHub collection downloaded onto your machine
+let MYF=[];try{window.__JUCE__.backend.addEventListener("bblist",o=>{MYF=Array.isArray(o.list)?o.list:[];if(U.view=="synth"&&S.ins[U.ins]&&S.ins[U.ins].wave=="bytebeat")buildIns()})}catch(_){}
+setTimeout(()=>send("bbget",{}),400);
+const myfSave=()=>send("bbput",{list:MYF});
+// a formula as found on the net: plain expression, or a C program with putchar(...) / main(t)
+function bbClean(txt){let s=String(txt||"").replace(/\/\*[\s\S]*?\*\//g," ").replace(/\/\/.*$/gm," ");const m=s.match(/putchar\s*\(([\s\S]*)\)\s*;/);if(m)s=m[1];
+ s=s.split(/\n/).map(x=>x.trim()).filter(Boolean).join(" ").replace(/\s+/g," ").trim().replace(/;$/,"");return s}
+async function bbFetchRepo(repo){toast("TÉLÉCHARGEMENT DE "+repo+"…");
+ try{const r=await fetch("https://api.github.com/repos/"+repo+"/contents/");if(!r.ok)throw new Error("HTTP "+r.status);const files=(await r.json()).filter(f=>f.type=="file"&&f.size>0&&f.size<600&&!/^(readme|makefile|play|plot|license|copying)/i.test(f.name)&&!/\.(c|h|md|sh|py|txt)$/i.test(f.name));
+  let ok=0,bad=0;for(const f of files){try{const t=await (await fetch(f.download_url)).text(),e=bbClean(t);if(e.length&&e.length<=96&&bbCompile(e).ok){if(!MYF.some(x=>x.f==e))MYF.push({n:f.name.toUpperCase().slice(0,24),f:e,v:[0,0,0,0],src:repo});ok++}else bad++}catch(_){bad++}}
+  myfSave();toast(ok+" FORMULES AJOUTÉES"+(bad?" · "+bad+" ignorées (trop longues ou fonctions non gérées)":""));buildIns()}
+ catch(e){toast("TÉLÉCHARGEMENT IMPOSSIBLE ("+e.message+") : vérifie ta connexion")}}
 function bbBox(p,I){if(I.bf==null){I.bf="t*((t>>a|t>>b)&c&t>>d)";Object.assign(I,{ba:12,bb:8,bc:63,bd:4,cut:1,env:0,s:1,a:.002,r:.05})}
  const box=document.createElement("div");box.className="bbbox smpbox";box.dataset.win="BYTEBEAT";box.style.gridColumn="1/-1";
  const top=document.createElement("div");top.className="pitchrow";
@@ -1264,7 +1278,17 @@ function bbBox(p,I){if(I.bf==null){I.bf="t*((t>>a|t>>b)&c&t>>d)";Object.assign(I
  ps.onchange=()=>{const k=+ps.value;ps.value="";if(isNaN(k)||!BBP[k])return;const [n,a,f,d]=BBP[k];I.bf=f;"abcd".split("").forEach((ch,j)=>I["b"+ch]=d[j]||0);I.bname=n;save();buildIns();toast(n+" · "+a)};
  const rnd=document.createElement("button");rnd.type="button";rnd.className="chip brk";rnd.textContent="🎲 HASARD";rnd.title="Une formule au hasard, fabriquée avec les briques des bytebeats classiques et écoutée avant : jamais muette, bloquée ou du pur bruit";
  rnd.onclick=()=>{const r=bbRandom();I.bf=r.f;"abcd".split("").forEach(ch=>I["b"+ch]=r.v[ch]||0);I.bname="HASARD";save();buildIns();smpAud&&0};
- top.append(ps,rnd);
+ const ms=document.createElement("select");ms.setAttribute("aria-label","Mes formules");ms.add(new Option("MES FORMULES ("+MYF.length+")…",""));MYF.forEach((x,k)=>ms.add(new Option(x.n+(x.src?" · "+x.src.split("/")[0]:""),String(k))));
+ ms.onchange=()=>{const k=+ms.value;ms.value="";const x=MYF[k];if(!x)return;I.bf=x.f;"abcd".split("").forEach((c,j)=>I["b"+c]=(x.v||[])[j]||0);I.bname=x.n;save();buildIns();toast(x.n)};
+ const sv=document.createElement("button");sv.type="button";sv.className="chip";sv.textContent="★ SAUVER";sv.title="Garde cette formule et ses réglages A-D dans MES FORMULES";
+ sv.onclick=()=>{const C=bbCompile(I.bf);if(!C.ok)return toast("LA FORMULE NE COMPILE PAS");const n=(prompt("Nom de la formule ?",I.bname||"MA FORMULE")||"").trim().toUpperCase().slice(0,24);if(!n)return;const it={n,f:I.bf,v:"abcd".split("").map(c=>Math.round(+I["b"+c]||0))};const k=MYF.findIndex(x=>x.n==n);if(k>=0)MYF[k]=it;else MYF.push(it);myfSave();buildIns();toast("SAUVÉE : "+n)};
+ const pl=document.createElement("button");pl.type="button";pl.className="chip";pl.textContent="COLLER UNE LISTE";pl.title="Colle plusieurs formules, une par ligne (« NOM = formule » ou juste la formule)";
+ pl.onclick=()=>{const t=prompt("Colle tes formules, une par ligne (NOM = formule) :","");if(!t)return;let ok=0,bad=0;t.split(/\n/).forEach((l,k)=>{l=l.trim();if(!l)return;let n="COLLÉE "+(MYF.length+1),f=l;const m=l.match(/^([^=()]{1,30})=(?!=)(.+)$/);if(m){n=m[1].trim().toUpperCase();f=m[2]}f=bbClean(f);if(f.length<=96&&bbCompile(f).ok){MYF.push({n:n.slice(0,24),f,v:[0,0,0,0]});ok++}else bad++});myfSave();buildIns();toast(ok+" AJOUTÉES"+(bad?" · "+bad+" refusées":""))};
+ const gh=document.createElement("button");gh.type="button";gh.className="chip";gh.textContent="⇩ COLLECTION GITHUB";gh.title="Télécharge une collection de formules (un fichier par formule) depuis GitHub, sur ta machine, dans MES FORMULES. Par défaut : erlehmann/algorithmic-symphonies";
+ gh.onclick=()=>{const r=(prompt("Dépôt GitHub (auteur/nom) :","erlehmann/algorithmic-symphonies")||"").trim();if(/^[\w.-]+\/[\w.-]+$/.test(r))bbFetchRepo(r)};
+ const dl=document.createElement("button");dl.type="button";dl.className="chip";dl.textContent="✕";dl.title="Retirer de MES FORMULES la formule qui porte ce nom";dl.onclick=()=>{const k=MYF.findIndex(x=>x.n==I.bname);if(k<0)return toast("CHARGE D'ABORD UNE DE TES FORMULES");if(!confirm("Retirer "+MYF[k].n+" ?"))return;MYF.splice(k,1);myfSave();buildIns()};
+ const top2=document.createElement("div");top2.className="pitchrow";top2.append(ms,sv,pl,gh,dl);
+ top.append(ps,rnd);box.appendChild(top2);
  const inp=document.createElement("input");inp.type="text";inp.className="bbin";inp.spellcheck=false;inp.maxLength=96;inp.value=I.bf;inp.setAttribute("aria-label","Formule");
  const col=document.createElement("div");col.className="bbcol";const er=document.createElement("div");er.className="bberr";
  const cv=document.createElement("canvas");cv.className="bbcv";
