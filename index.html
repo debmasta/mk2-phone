@@ -70,7 +70,7 @@ function padPoll(){if(!ex||!navigator.getGamepads)return;let g=null;try{for(cons
   else if(f=="stairdn")o.stair=-1;else if(f=="stairup")o.stair=1;else if(f=="sup")o.deg+=Math.round(v*7);else if(f=="sdn")o.deg-=Math.round(v*7);else if(f=="stut"&&v>.1){o.stut=1;o.rate=Math.min(4,v*5|0)}};
  stick(fn[0],ax[0],ax[1]);stick(fn[1],ax[2],ax[3]);trig(fn[2],ax[4]);trig(fn[3],ax[5]);
  const btn=(f,b)=>{if(/^x[0-8]$/.test(f))padh[+f[1]]=padh[+f[1]]||bt[b];if(pr(b)){if(/^mt[0-7]$/.test(f)){const t=+f[2];MUT[t]=MUT[t]?0:1;ex.tw(100+t,MUT[t])}else if(/^so[0-7]$/.test(f)){const t=+f[2];SOLO[t]=SOLO[t]?0:1;ex.tw(110+t,SOLO[t])}else if(f=="sod"){SOLO[8]=SOLO[8]?0:1;ex.tw(118,SOLO[8])}}
-if(bt[b]&&/^s[1-4]$/.test(f))o.slot[+f[1]-1]=1;if(bt[b]){if(f=="rev")o.rev=1;else if(f=="muteD")o.muteD=1;else if(f=="muteS")o.muteS=1;else if(f=="stut"){o.stut=1;o.rate=-1}else if(f=="abh")o.ab=1}
+if(bt[b]&&/^s[1-4]$/.test(f))o.slot[+f[1]-1]=1;if(bt[b]){if(f=="bfdn")o.cut-=1.6;else if(f=="bpdn")o.bend-=12;else if(f=="bstair")o.stair=-1}if(pr(b)&&f=="cam")fire("padcam",{});if(bt[b]){if(f=="rev")o.rev=1;else if(f=="muteD")o.muteD=1;else if(f=="muteS")o.muteS=1;else if(f=="stut"){o.stut=1;o.rate=-1}else if(f=="abh")o.ab=1}
   if(pr(b)){if(f=="scale"){BASESC=(BASESC+1)%4;fire("toast",{t:["GAMME DU MORCEAU","GAMME 1","GAMME 2","GAMME 3"][BASESC]})}else if(f=="play"){PLAY=PLAY?0:1;ex.set(0,PLAY)}else if(f=="ab"){abTog=abTog?0:1;o.ab=abTog}}};
  for(let k=0;k<6;k++)btn(fn[4+k],k);btn(fn[12],12);
  const pair=(f,lo,hi)=>{const d=(pr(hi)?1:0)-(pr(lo)?1:0);if(!d)return;if(f=="phrase")PAD.ph+=d;else if(f=="var")fire("varstep",{d});else if(f=="tr"){TW.tr=Math.max(-24,Math.min(24,TW.tr+d));fire("toast",{t:"TRANSPOSE "+(TW.tr>0?"+":"")+TW.tr})}};
@@ -712,6 +712,8 @@ button,nav,.pad,.pd,label,canvas,.win .wt,.scrbar{-webkit-user-select:none;user-
 .lvm,.lvs{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:3px}.live button{min-height:0!important;min-width:0!important;height:auto}.lvm button,.lvs button{padding:4px 0!important;min-width:0!important;font:700 9px var(--mono,monospace)!important;letter-spacing:0!important}
 .lvs button{padding:1px 0!important;font-size:8px!important;opacity:.8}
 :root .lvm button.on{background:#FF2E88!important;border-color:#FF2E88!important;color:#fff!important}:root .lvs button.on{background:#FFD400!important;border-color:#FFD400!important;color:#061638!important;opacity:1}
+.lvm button,.lvs button{position:relative}.lvm button[data-pk]:not([data-pk=""])::after,.lvs button[data-pk]:not([data-pk=""])::after{content:attr(data-pk);position:absolute;right:-4px;top:-6px;min-width:12px;height:12px;padding:0 2px;border-radius:7px;background:var(--pkc);color:#061638;font:700 7.5px/12px var(--mono,monospace);box-shadow:0 0 0 1px #061638;z-index:2}
+.lvpad button{padding:3px 5px!important}.lvpad .pk{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 3px;border-radius:50%;background:var(--k);color:#061638;font:700 9px var(--mono,monospace);font-style:normal}.lvpad .pk.w{border-radius:4px;font-size:8px}
 .lvl{display:flex;justify-content:space-between;font:8px var(--mono,monospace);opacity:.6;margin:-3px 0}
 .lvvu{grid-template-columns:repeat(9,minmax(0,1fr))!important}.lvg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:4px}
 .lvf{position:relative;height:56px;padding:6px 7px;border:2px solid #8DF3FF;background:linear-gradient(rgba(141,243,255,.10),rgba(0,0,0,.18));clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
@@ -957,11 +959,11 @@ function rawP(tog){if(tog){RAW=!RAW;send("p",{raw:RAW?1:0})}const b=$("#raw");b.
 const curTrack=()=>{const t=colT(U.col);return t<0?0:t};
 const PADDEF={sl:"stut",sr:"pitch",lt:"fopen",rt:"fclose",a:"x0",b:"x1",x:"x2",y:"x3",lb:"muteD",rb:"muteS",dlr:"phrase",dud:"tr",st:"play"};
 let PADM={...PADDEF},REC=0,STEP=1;
-function sendUi(){if(!ready)return;send("ui",{chain:mode=="chain"?1:0,ph:U.ph,play:uiPlay,live:U.lastI[curTrack()],prate,skin,help:HELP,oct:U.oct,pad:PADM,step:STEP,slots:SLOTS,mask:MASK,root:ROOT,pscale:PSCALE,stairRate:STR,stairSkip:STS,skipIntro:SKIPI,abB:ABB,abQ:ABQ,shake:SHK,twister:TWI,km:KM,pfp:PFP})}
+function sendUi(){if(!ready)return;send("ui",{chain:mode=="chain"?1:0,ph:U.ph,play:uiPlay,live:U.lastI[curTrack()],prate,skin,help:HELP,oct:U.oct,pad:PADM,step:STEP,slots:SLOTS,mask:MASK,root:ROOT,pscale:PSCALE,stairRate:STR,stairSkip:STS,skipIntro:SKIPI,abB:ABB,abQ:ABQ,shake:SHK,twister:TWI,km:KM,pfp:PFP,lvs:LVS})}
 let SKIPI=0;
 let STR=1,STS=1;
 let ROOT=4,PSCALE=SCL.length;
-let MASK=0x1ff,KM=Array(10).fill(0x1ff),PFP=[0,0,0,0,1,0,1,3,1];
+let MASK=0x1ff,KM=Array(10).fill(0x1ff),PFP=[0,0,0,0,1,0,1,3,1],LVS=Array.from({length:15},(_,i)=>i);
 function buildMask(){const el=$("#mask");el.innerHTML="";const lab=[...Array(NT)].map((_,i)=>"T"+(i+1)).concat(["DR"]);lab.forEach((t,i)=>{const b=document.createElement("button");b.type="button";b.textContent=t;b.setAttribute("aria-pressed",(MASK>>i)&1?"true":"false");b.classList.toggle("on",!!((MASK>>i)&1));
  b.title=i<NT?"Les twists touchent la piste "+t:"Les twists touchent les drums";b.onclick=()=>{MASK^=1<<i;buildMask();sendUi()};el.appendChild(b)});
  const all=document.createElement("button");all.type="button";all.textContent="TOUT";all.onclick=()=>{MASK=MASK==0x1ff?0:0x1ff;buildMask();sendUi()};el.appendChild(all)}
@@ -1339,6 +1341,7 @@ function varCap(I,k){if(!Array.isArray(I.vs))I.vs=Array(VN).fill(null);I.vs[k]="
 function varStep(d){let I=S.ins[U.ins];const has=x=>x&&(x.vs||[]).some(Boolean);if(!has(I))I=S.ins.find(has);if(!I)return toast("AUCUNE VARIANTE CAPTURÉE");
  const n=I.vs.length;let k=I.vi==null||I.vi<0?(d>0?-1:n):I.vi;for(let j=0;j<n;j++){k=((k+d)%n+n)%n;if(I.vs[k])return varApply(I,k)}}
 try{window.__JUCE__.backend.addEventListener("varstep",o=>varStep(o.d||1))}catch(_){}
+try{window.__JUCE__.backend.addEventListener("padcam",()=>cam(1.4))}catch(_){}
 function varRow(I){const r=document.createElement("div");r.className="varrow";const lab=document.createElement("span");lab.className="smpn";lab.textContent="VARIANTES A-D";r.appendChild(lab);
  const vs=Array.isArray(I.vs)?I.vs:[];
  const cap=document.createElement("button");cap.type="button";cap.className="chip vcap";cap.textContent="● CAPTURER";cap.title="Garde la position de A B C D dans la première case libre";
@@ -1631,7 +1634,7 @@ $("#phClear").onclick=()=>{if(!$("#phClear").dataset.arm){$("#phClear").dataset.
 const PIN=[["sl","STICK GAUCHE","s"],["sr","STICK DROIT","s"],["lt","GÂCHETTE LT","t"],["rt","GÂCHETTE RT","t"],["a","A","b"],["b","B","b"],["x","X","b"],["y","Y","b"],["lb","LB","b"],["rb","RB","b"],["dlr","CROIX ◀ ▶","d"],["dud","CROIX ▲ ▼","d"],["st","START","b"]];
 const PFN={s:[["stut","Stutter (plus tu pousses, plus c'est rapide)"],["pitch","Pitch ±12 (gauche/droite)"],["pstep","Pitch par pas dans la gamme (gauche/droite)"],["filt","Filtre (gauche ferme, droite ouvre)"],["filtres","Filtre + résonance (haut)"],["none","Rien"]],
  t:[["fclose","Filtre qui se ferme"],["fopen","Filtre qui s'ouvre"],["res","Résonance"],["pup","Pitch vers le haut (glissé)"],["pdn","Pitch vers le bas (glissé)"],["sup","Pitch par pas ↑ dans la gamme"],["sdn","Pitch par pas ↓ dans la gamme"],["stairdn","ESCALIER ↓ (descend la gamme en rythme jusqu'à −1 octave)"],["stairup","ESCALIER ↑ (monte la gamme en rythme jusqu'à +1 octave)"],["stut","Stutter (vitesse = pression)"],["none","Rien"]],
- b:[["stut","STUTTER (tenir)"],["muteD","Coupe les drums (tenir)"],["muteS","Coupe le synthé (tenir)"],["play","Play / stop"],["ab","A/B : bascule entre ta phrase et la phrase B"],["abh","A/B : phrase B tant que tu tiens"],["x7","LIVE · STUTTER (tenir)"],["x0","LIVE · ARPÈGE (tenir)"],["x1","LIVE · OCTAVE (tenir)"],["x2","LIVE · REVERSE (tenir)"],["x4","LIVE · ROLL (tenir)"],["x6","LIVE · GLISSÉ (tenir)"],["x8","LIVE · DELAY THROW (tenir)"],["x3","LIVE · GAMME (tenir)"],["x5","LIVE · VITESSE (tenir)"],["mt0","Mute T1 (appui)"],["mt1","Mute T2 (appui)"],["mt2","Mute T3 (appui)"],["mt3","Mute T4 (appui)"],["mt4","Mute T5 (appui)"],["mt5","Mute T6 (appui)"],["mt6","Mute T7 (appui)"],["mt7","Mute T8 (appui)"],["so0","Solo T1 (appui)"],["so1","Solo T2 (appui)"],["so2","Solo T3 (appui)"],["so3","Solo T4 (appui)"],["so4","Solo T5 (appui)"],["so5","Solo T6 (appui)"],["so6","Solo T7 (appui)"],["so7","Solo T8 (appui)"],["sod","Solo drums (appui)"],["none","Rien"]],
+ b:[["stut","STUTTER (tenir)"],["muteD","Coupe les drums (tenir)"],["muteS","Coupe le synthé (tenir)"],["play","Play / stop"],["ab","A/B : bascule entre ta phrase et la phrase B"],["abh","A/B : phrase B tant que tu tiens"],["x7","LIVE · STUTTER (tenir)"],["x0","LIVE · ARPÈGE (tenir)"],["x1","LIVE · OCTAVE (tenir)"],["x2","LIVE · REVERSE (tenir)"],["x4","LIVE · ROLL (tenir)"],["x6","LIVE · GLISSÉ (tenir)"],["x8","LIVE · DELAY THROW (tenir)"],["x3","LIVE · GAMME (tenir)"],["x5","LIVE · VITESSE (tenir)"],["bfdn","LIVE · FILTRE ↓ (tenir)"],["bpdn","LIVE · PITCH ↓ (tenir)"],["bstair","LIVE · ESCALIER ↓ (tenir)"],["cam","LIVE · SECOUSSE (appui)"],["mt0","Mute T1 (appui)"],["mt1","Mute T2 (appui)"],["mt2","Mute T3 (appui)"],["mt3","Mute T4 (appui)"],["mt4","Mute T5 (appui)"],["mt5","Mute T6 (appui)"],["mt6","Mute T7 (appui)"],["mt7","Mute T8 (appui)"],["so0","Solo T1 (appui)"],["so1","Solo T2 (appui)"],["so2","Solo T3 (appui)"],["so3","Solo T4 (appui)"],["so4","Solo T5 (appui)"],["so5","Solo T6 (appui)"],["so6","Solo T7 (appui)"],["so7","Solo T8 (appui)"],["sod","Solo drums (appui)"],["none","Rien"]],
  d:[["phrase","Phrase précédente / suivante"],["tr","Transpose −1 / +1"],["var","VARIANTES A-D précédente / suivante"],["none","Rien"]]};
 function buildPad(){buildTwister();const el=$("#padmap");if(!el)return;el.innerHTML="";PIN.forEach(([k,lab,ty])=>{const l=document.createElement("label");l.innerHTML="<b>"+lab+"</b>";const s=document.createElement("select");s.setAttribute("aria-label",lab);
  PFN[ty].forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;s.appendChild(o)});s.value=PFN[ty].some(z=>z[0]==PADM[k])?PADM[k]:PADDEF[k];PADM[k]=s.value;s.onchange=()=>{PADM[k]=s.value;sendUi()};l.appendChild(s);el.appendChild(l)});
@@ -1797,6 +1800,7 @@ function buildRollBar(){const el=$("#rollBar");el.innerHTML="";const lab=documen
 // ---------- go
 function boot(o){
  const u=o&&o.ui||{};if(u.twister!=null)TWI=u.twister|0;if(u.shake!=null)SHK=u.shake|0;if(u.abB!=null)ABB=u.abB|0;if(u.abQ!=null)ABQ=u.abQ|0;if(u.skipIntro){SKIPI=1;$("#skipIntro").checked=true;introDone=true;$("#intro").hidden=true}if(u.mask!=null)MASK=u.mask|0;if(u.stairRate!=null)STR=u.stairRate|0;if(u.stairSkip!=null)STS=u.stairSkip|0||1;if(u.root!=null)ROOT=u.root|0;if(u.pscale!=null)PSCALE=u.pscale|0;if(u.pad)PADM={...PADDEF,...u.pad};if(Array.isArray(u.slots)&&u.slots.length==4)SLOTS=u.slots.map((x,i)=>STY[x.t]?{t:x.t,p:x.p|0}:{...SLOTDEF[i]});if(u.step!=null)STEP=u.step|0;if(u.skin){skinSet(u.skin)}if(u.help!=null)helpSet(u.help);if(u.chain)mode="chain";if(u.ph!=null)U.ph=u.ph|0;if(u.prate!=null)prate=u.prate|0;if(u.oct!=null)U.oct=u.oct|0;
+ if(Array.isArray(u.km)&&u.km.length==10)KM=u.km.map(x=>x|0);if(Array.isArray(u.pfp)&&u.pfp.length==9)PFP=u.pfp.map(x=>x|0);if(Array.isArray(u.lvs)&&u.lvs.length==15)LVS=u.lvs.map(x=>Math.max(0,Math.min(14,x|0)));
  padMigrate();
  const had=o&&o.song&&loadSong(o.song);
  if(o&&o.p)applyP(o.p);paintMode();paula(false);$("#bpm").value=S.bpm;$("#swing").value=String(S.swing||0);$("#grvA").value=String(S.grvA||0);paintScale();buildGrid();buildSlots();buildMask();buildTv();paintBank();paintTw();buildPad();paintTools();buildAb();paintShk();
@@ -2173,54 +2177,76 @@ function padPress(P,on){if(P.cam){if(on)cam(1.4);return}if(P.ty!=null)send("tw",
 function liveBuild(){const as=$("aside");if(!as||LIVE)return;
  const mk=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
  const root=mk("div","live");root.id="live";
- const hd=mk("div","lvh",'<small>tiens un effet pour le jouer · ⋯ = ses réglages · pastille = bouton de la manette (SG / SD = sticks) · il s’allume aussi quand c’est la manette qui joue</small>');const h2=as.querySelector("h2");if(h2){if(h2.firstChild&&h2.firstChild.nodeType==3)h2.firstChild.textContent="Live ";const ji=h2.querySelector("i");if(ji)ji.textContent="ライブ"}const grab=mk("button","lvgrab","LIVE");grab.type="button";grab.setAttribute("aria-label","Ouvrir / fermer LIVE");
+ const hd=mk("div","lvh",'<small>tiens = joue · ⋯ = effet, pistes, bouton manette · appui long (ou clic droit) sur T1…DR / S = leur bouton manette</small>');const h2=as.querySelector("h2");if(h2){if(h2.firstChild&&h2.firstChild.nodeType==3)h2.firstChild.textContent="Live ";const ji=h2.querySelector("i");if(ji)ji.textContent="ライブ"}const grab=mk("button","lvgrab","LIVE");grab.type="button";grab.setAttribute("aria-label","Ouvrir / fermer LIVE");
  grab.onclick=()=>{document.documentElement.classList.toggle("lvopen");try{localStorage.setItem("mk2Live",document.documentElement.classList.contains("lvopen")?"1":"0")}catch(_){}};
  const vu=mk("div","lvvu"),mrow=mk("div","lvm"),srow=mk("div","lvs");
  PTR.forEach((n,t)=>{vu.appendChild(mk("i"));const m=mk("button","",n);m.type="button";m.title="Mute "+n;m.onclick=()=>{if(t==NT)send("tw",{k:"muteD",v:TW.muteD?0:1});else{U.mute[t]^=1;send("tw",{k:"m"+t,v:U.mute[t]});paintHead&&paintHead()}setTimeout(livePaint,60)};mrow.appendChild(m);
   const so=mk("button","","S");so.type="button";so.title="Solo "+n;so.onclick=()=>{const cur=LIVE.solo?LIVE.solo[t]:0;send("tw",{k:t==NT?"sod":"so"+t,v:cur?0:1});LIVE.solo=LIVE.solo||Array(NT+1).fill(0);LIVE.solo[t]=cur?0:1;livePaint()};srow.appendChild(so)});
  const ml=mk("div","lvl","<span>MUTE</span><span>SOLO ↓</span>");
  const g=mk("div","lvg");
- PADS.forEach((P,i)=>{const d=mk("div","lvf"+(P.hot?" hot":""),'<b>'+P.n+'</b><div class="lvb"><small></small><em></em></div><button type="button" class="lvo" style="border:0;background:transparent" aria-label="Réglages '+P.n+'">⋯</button>');d.setAttribute("role","button");d.setAttribute("aria-label",P.n+" (tenir)");
-  d.addEventListener("pointerdown",e=>{if(e.button==2||e.target.closest(".lvo"))return;e.preventDefault();try{d.setPointerCapture(e.pointerId)}catch(_){}d.classList.add("on");padPress(P,true)});
-  const up=()=>{if(d.classList.contains("on")){d.classList.remove("on");padPress(P,false)}};d.addEventListener("pointerup",up);d.addEventListener("pointercancel",up);d.addEventListener("lostpointercapture",up);
-  d.addEventListener("contextmenu",e=>{e.preventDefault();liveBubble(P,d)});d.querySelector(".lvo").onclick=e=>{e.stopPropagation();liveBubble(P,d)};
-  P.lv=d;g.appendChild(d)});
- const rel=mk("button","chip lvrel","⟲ TOUT RELÂCHER");rel.type="button";rel.onclick=()=>{PADS.forEach(P=>{if(P.lv)P.lv.classList.remove("on");if(!P.cam)padPress(P,false)});send("tw",{k:"stut",v:0});toast("TOUT RELÂCHÉ")};
+ const rel=mk("button","chip lvrel","⟲ TOUT RELÂCHER");rel.type="button";rel.onclick=()=>{[...LIVE.g.children].forEach(d=>d.classList.remove("on"));PADS.forEach(P=>{if(!P.cam)padPress(P,false)});send("tw",{k:"stut",v:0});toast("TOUT RELÂCHÉ")};
  root.append(grab,hd,vu,mrow,ml,srow,g,rel);
  // the old twist controls (stick cards, stutter, rates, masks, A B X Y menus) are replaced by LIVE: they stay in the page, hidden, so nothing else breaks
  [...as.children].forEach(x=>{if(x.matches(".cards,.tw,.rates,.mlab,.mask,#slots"))x.classList.add("lvold")});
  // computer: at the top of the right column · phone: a drawer fixed to the bottom of the screen (it must live in <body>, outside any transformed box)
  const mq=matchMedia("(max-width:900px)");const place=()=>{if(mq.matches){if(root.parentElement!==document.body)document.body.appendChild(root)}else if(h2){if(root.previousElementSibling!==h2)h2.after(root)}else if(root.parentElement!==as)as.insertBefore(root,as.firstChild)};
  place();try{mq.addEventListener("change",place)}catch(_){mq.addListener&&mq.addListener(place)}
- LIVE={root,vu:[...vu.children],m:[...mrow.children],s:[...srow.children],solo:null};
+ LIVE={root,g,vu:[...vu.children],m:[...mrow.children],s:[...srow.children],solo:null};liveGrid();
+ [...LIVE.m,...LIVE.s].forEach((x,i)=>{const t=i%(NT+1);let tm=0,lg=0;x.addEventListener("pointerdown",()=>{lg=0;tm=setTimeout(()=>{lg=1;trackBubble(t,x)},550)});["pointerup","pointerleave","pointercancel"].forEach(ev=>x.addEventListener(ev,()=>clearTimeout(tm)));
+  x.addEventListener("click",e=>{if(lg){e.stopImmediatePropagation();e.preventDefault()}},true);x.addEventListener("contextmenu",e=>{e.preventDefault();trackBubble(t,x)})});
  try{if(localStorage.getItem("mk2Live")=="1")document.documentElement.classList.add("lvopen")}catch(_){}
  livePaint()}
-function liveBubble(P,anchor){closePop&&closePop();const old=$("#lvpop");if(old){old.remove();if(old.dataset.n==P.n)return}
- const b=document.createElement("div");b.id="lvpop";b.className="lvpop";b.dataset.n=P.n;b.innerHTML="<h4>"+P.n+" <small>réglages</small></h4>";
- if(P.opt){b.appendChild(Object.assign(document.createElement("div"),{className:"lvpl",textContent:"RÉGLAGE"}));const r=document.createElement("div");r.className="lvpr";
+function liveBubble(P,anchor,slot){lvPop(anchor,P.n,b=>{
+ if(slot!=null){lab(b,"EFFET DE CETTE CASE");const r=document.createElement("div");r.className="lvpr";PADS.forEach((Q,j)=>{const x=document.createElement("button");x.type="button";x.textContent=Q.n;x.classList.toggle("on",LVS[slot]==j);
+   x.onclick=()=>{LVS[slot]=j;sendUi();liveGrid();const t=LIVE.g.children[slot];liveBubble(PADS[j],t,slot)};r.appendChild(x)});b.appendChild(r)}
+ if(P.opt){lab(b,"RÉGLAGE");const r=document.createElement("div");r.className="lvpr";
   P.opt.forEach((o,k)=>{const x=document.createElement("button");x.type="button";x.textContent=o;x.classList.toggle("on",(PFP[P.ty]||0)==k);x.onclick=()=>{PFP[P.ty]=k;sendUi();[...r.children].forEach((y,j)=>y.classList.toggle("on",j==k));livePaint();perfPaint()};r.appendChild(x)});b.appendChild(r)}
- b.appendChild(Object.assign(document.createElement("div"),{className:"lvpl",textContent:P.km>=0?"PISTES TOUCHÉES":"PISTES"}));
- const r2=document.createElement("div");r2.className="lvpr";
- if(P.km>=0){PTR.forEach((n,k)=>{const x=document.createElement("button");x.type="button";x.textContent=n;x.classList.toggle("on",!!((KM[P.km]>>k)&1));x.onclick=()=>{KM[P.km]^=1<<k;sendUi();x.classList.toggle("on",!!((KM[P.km]>>k)&1));livePaint();perfPaint()};r2.appendChild(x)});
-  const all=document.createElement("button");all.type="button";all.textContent="TOUT";all.onclick=()=>{KM[P.km]=KM[P.km]==511?0:511;sendUi();[...r2.children].forEach((y,k)=>k<9&&y.classList.toggle("on",!!((KM[P.km]>>k)&1)));livePaint();perfPaint()};r2.appendChild(all)}
- else r2.innerHTML="<span class='lvpn'>toutes les pistes</span>";b.appendChild(r2);
- const pb=liveBtn(P);b.appendChild(Object.assign(document.createElement("div"),{className:"lvpl",innerHTML:"MANETTE : "+(pb?"<b>"+pb+"</b>":"aucun bouton")+" <small>(à régler dans PERF › MANETTE)</small>"}));
- const x=document.createElement("button");x.type="button";x.className="chip";x.textContent="FERMER";x.onclick=()=>b.remove();b.appendChild(x);
- document.body.appendChild(b);const R=anchor.getBoundingClientRect(),W=Math.min(290,innerWidth-16);b.style.width=W+"px";
- let L=R.left-W-10;if(L<8)L=Math.max(8,Math.min(innerWidth-W-8,R.left));let T=R.top;b.style.left=L+"px";b.style.top="0px";const H=b.offsetHeight;if(T+H>innerHeight-8)T=Math.max(8,innerHeight-H-8);if(L==R.left||L>R.left-W-10&&L!=R.left-W-10)T=Math.max(8,Math.min(R.bottom+6,innerHeight-H-8));b.style.top=T+"px";
- setTimeout(()=>{const off=e=>{if(!b.contains(e.target)&&!e.target.closest(".lvo")){b.remove();removeEventListener("pointerdown",off,true)}};addEventListener("pointerdown",off,true)},0)}
+ if(P.km>=0){lab(b,"PISTES TOUCHÉES");const r2=document.createElement("div");r2.className="lvpr";
+  PTR.forEach((n,k)=>{const x=document.createElement("button");x.type="button";x.textContent=n;x.classList.toggle("on",!!((KM[P.km]>>k)&1));x.onclick=()=>{KM[P.km]^=1<<k;sendUi();x.classList.toggle("on",!!((KM[P.km]>>k)&1));livePaint();perfPaint()};r2.appendChild(x)});
+  const all=document.createElement("button");all.type="button";all.textContent="TOUT";all.onclick=()=>{KM[P.km]=KM[P.km]==511?0:511;sendUi();[...r2.children].forEach((y,k)=>k<9&&y.classList.toggle("on",!!((KM[P.km]>>k)&1)));livePaint();perfPaint()};r2.appendChild(all);b.appendChild(r2)}
+ const fn=liveFn(P);if(fn){lab(b,"BOUTON DE LA MANETTE <small>(re-touche pour libérer)</small>");b.appendChild(padPick(fn,LVTRIG[P.k]))}})}
+// bubble for a track's MUTE / SOLO button: which controller button toggles it
+function trackBubble(t,anchor){const n=PTR[t];lvPop(anchor,n+" · manette",b=>{lab(b,"MUTE "+n+(t==NT?" <small>(tant que tu tiens)</small>":" <small>(appui = coupe / remet)</small>"));b.appendChild(padPick(t==NT?"muteD":"mt"+t));
+ lab(b,"SOLO "+n+" <small>(appui = solo / fin du solo)</small>");b.appendChild(padPick(t==NT?"sod":"so"+t))})}
 // which controller inputs trigger this effect (buttons, and sticks / triggers for the ones that have an analog version)
 const PKL={sl:"SG",sr:"SD",lt:"LT",rt:"RT",a:"A",b:"B",x:"X",y:"Y",lb:"LB",rb:"RB",st:"START"};
-function liveKeys(P){const M=PADM||{},fn=P.ty!=null?["x"+P.ty].concat(P.ty==7?["stut"]:[]):P.k=="ab"?["abh","ab"]:P.k=="muteD"?["muteD"]:P.k=="cut"?["fclose","filt","filtres"]:P.k=="bend"?["pdn","pitch"]:P.k=="stair"?["stairdn"]:[];
+// the controller function each tile / track button stands for
+function liveFn(P){return P.ty!=null?"x"+P.ty:{ab:"abh",muteD:"muteD",cut:"bfdn",bend:"bpdn",stair:"bstair"}[P.k]||(P.cam?"cam":"")}
+const LVTRIG={cut:"fclose",bend:"pdn",stair:"stairdn"};
+function liveKeys(P){const M=PADM||{},fn=[liveFn(P)].concat(P.ty==7?["stut"]:[],P.k=="ab"?["ab"]:[],P.k=="cut"?["fclose","filt","filtres"]:[],P.k=="bend"?["pdn","pitch"]:[],P.k=="stair"?["stairdn"]:[]);
  return Object.keys(PKL).filter(k=>fn.includes(M[k])).map(k=>PKL[k])}
+const BKEYS=["a","b","x","y","lb","rb","st"];
+const fnName=f=>{for(const L of Object.values(PFN))for(const [k,n] of L)if(k==f)return n.replace(/^LIVE · /,"");return f};
+// a row of controller buttons that sets PADM[key]=fn (tap again to free the button)
+function padPick(fn,extra){const r=document.createElement("div");r.className="lvpr lvpad";
+ const keys=BKEYS.concat(extra?["lt","rt"]:[]);
+ const paint=()=>[...r.children].forEach(x=>{const k=x.dataset.k,f=PADM[k];x.classList.toggle("on",f==(k=="lt"||k=="rt"?extra:fn));x.title=f&&f!="none"?PKL[k]+" fait : "+fnName(f):PKL[k]+" : libre"});
+ keys.forEach(k=>{const x=document.createElement("button");x.type="button";x.dataset.k=k;x.innerHTML='<i class="pk'+(PKL[k].length>1?" w":"")+'" style="--k:'+(PKC[PKL[k]]||"#cfd8ff")+'">'+PKL[k]+"</i>";
+  x.onclick=()=>{const want=k=="lt"||k=="rt"?extra:fn,was=PADM[k];if(was==want){PADM[k]="none";toast(PKL[k]+" : LIBRE")}else{PADM[k]=want;toast(PKL[k]+" → "+fnName(want)+(was&&was!="none"?"  (avant : "+fnName(was)+")":""))}
+   sendUi();try{buildPad()}catch(_){}paint();livePaint()};r.appendChild(x)});paint();return r}
+function lvPop(anchor,title,fill){closePop&&closePop();const old=$("#lvpop");if(old){old.remove();if(old.dataset.n==title)return}
+ const b=document.createElement("div");b.id="lvpop";b.className="lvpop";b.dataset.n=title;b.innerHTML="<h4>"+title+"</h4>";fill(b);
+ const x=document.createElement("button");x.type="button";x.className="chip";x.textContent="FERMER";x.onclick=()=>b.remove();b.appendChild(x);
+ document.body.appendChild(b);const R=anchor.getBoundingClientRect(),W=Math.min(310,innerWidth-16);b.style.width=W+"px";b.style.left="0px";b.style.top="0px";const H=b.offsetHeight;
+ let L=R.left-W-10,T=R.top;if(L<8){L=Math.max(8,Math.min(innerWidth-W-8,R.left+R.width/2-W/2));T=R.bottom+6;if(T+H>innerHeight-8)T=R.top-H-6}if(T+H>innerHeight-8)T=innerHeight-H-8;if(T<8)T=8;b.style.left=L+"px";b.style.top=T+"px";
+ setTimeout(()=>{const off=e=>{if(!b.isConnected){removeEventListener("pointerdown",off,true);return}if(!b.contains(e.target)&&!e.target.closest(".lvo")){b.remove();removeEventListener("pointerdown",off,true)}};addEventListener("pointerdown",off,true)},0)}
+const lab=(b,t)=>b.appendChild(Object.assign(document.createElement("div"),{className:"lvpl",innerHTML:t}));
 function liveBtn(P){return liveKeys(P).join("+")}
 const PKC={A:"#3BB54A",B:"#E8414A",X:"#2E86FF",Y:"#F5C400"};
+function liveGrid(){const g=LIVE.g;g.innerHTML="";PADS.forEach(P=>P.lv=null);
+ LVS.forEach((j,slot)=>{const P=PADS[j];const d=document.createElement("div");d.className="lvf"+(P.hot?" hot":"");d.innerHTML='<b>'+P.n+'</b><div class="lvb"><small></small><em></em></div><button type="button" class="lvo" style="border:0;background:transparent" aria-label="Réglages '+P.n+'">⋯</button>';d.setAttribute("role","button");d.setAttribute("aria-label",P.n+" (tenir)");
+  d.addEventListener("pointerdown",e=>{if(e.button==2||e.target.closest(".lvo"))return;e.preventDefault();try{d.setPointerCapture(e.pointerId)}catch(_){}d.classList.add("on");padPress(P,true)});
+  const up=()=>{if(d.classList.contains("on")){d.classList.remove("on");padPress(P,false)}};d.addEventListener("pointerup",up);d.addEventListener("pointercancel",up);d.addEventListener("lostpointercapture",up);
+  d.addEventListener("contextmenu",e=>{e.preventDefault();liveBubble(P,d,slot)});d.querySelector(".lvo").onclick=e=>{e.stopPropagation();liveBubble(P,d,slot)};
+  (P.lvs=P.lvs||[]);P.lv=P.lv||d;g.appendChild(d);d._P=P});livePaint()}
 function livePaint(){if(!LIVE)return;
  LIVE.m.forEach((b,t)=>b.classList.toggle("on",t==NT?!!TW.muteD:!!U.mute[t]));LIVE.s.forEach((b,t)=>b.classList.toggle("on",!!(LIVE.solo&&LIVE.solo[t])));
- PADS.forEach(P=>{if(!P.lv)return;let sub="";if(P.opt)sub=P.opt[PFP[P.ty]||0];if(P.km>=0){const m=KM[P.km]||0;const tr=m==511?"tout":m==0?"aucune piste":PTR.filter((_,k)=>(m>>k)&1).join(" ");sub=(sub?sub+" · ":"")+tr}else if(!P.cam&&!sub)sub="toutes les pistes";
-  P.lv.querySelector("small").textContent=sub;const em=P.lv.querySelector("em");em.innerHTML=liveKeys(P).map(k=>'<i class="pk'+(k.length>1?" w":"")+'" style="--k:'+(PKC[k]||"#cfd8ff")+'">'+k+"</i>").join("")})}
+ const bad=f=>Object.keys(PKL).filter(k=>BKEYS.includes(k)&&PADM[k]==f).map(k=>PKL[k]);
+ LIVE.m.forEach((b,t)=>{const k=bad(t==NT?"muteD":"mt"+t);b.dataset.pk=k.join("");b.style.setProperty("--pkc",PKC[k[0]]||"#cfd8ff")});LIVE.s.forEach((b,t)=>{const k=bad(t==NT?"sod":"so"+t);b.dataset.pk=k.join("");b.style.setProperty("--pkc",PKC[k[0]]||"#cfd8ff")});
+ [...LIVE.g.children].forEach(d=>{const P=d._P;if(!P)return;let sub="";if(P.opt)sub=P.opt[PFP[P.ty]||0];if(P.km>=0){const m=KM[P.km]||0;const tr=m==511?"tout":m==0?"aucune piste":PTR.filter((_,k)=>(m>>k)&1).join(" ");sub=(sub?sub+" · ":"")+tr}else if(!P.cam&&!sub)sub="toutes les pistes";
+  d.querySelector("small").textContent=sub;const em=d.querySelector("em");em.innerHTML=liveKeys(P).map(k=>'<i class="pk'+(k.length>1?" w":"")+'" style="--k:'+(PKC[k]||"#cfd8ff")+'">'+k+"</i>").join("")})}
 let LVT=0;function liveTick(o){if(!LIVE)return;const w=o.tw||{},h=w.hold||[];
- PADS.forEach(P=>{if(!P.lv)return;const a=P.ty!=null?!!h[P.ty]||(P.ty==7&&!!w.stut):P.k=="cut"?(+w.cut||0)<-.05:P.k=="bend"?(+w.bend||0)<-.1:P.k=="stair"?(+w.stair||0)<0:P.k=="ab"?o.ab!=null&&o.ab>=0:P.k=="muteD"?!!w.muteD:false;P.lv.classList.toggle("act",a)});if(o.solo)LIVE.solo=o.solo;if(Array.isArray(o.mut))o.mut.forEach((m,t)=>U.mute[t]=m?1:0);const now=performance.now();if(now-LVT<60)return;LVT=now;
+ [...LIVE.g.children].forEach(d=>{const P=d._P;if(!P)return;const a=P.ty!=null?!!h[P.ty]||(P.ty==7&&!!w.stut):P.k=="cut"?(+w.cut||0)<-.05:P.k=="bend"?(+w.bend||0)<-.1:P.k=="stair"?(+w.stair||0)<0:P.k=="ab"?o.ab!=null&&o.ab>=0:P.k=="muteD"?!!w.muteD:false;d.classList.toggle("act",a)});if(o.cam)cam(1.4);if(o.solo)LIVE.solo=o.solo;if(Array.isArray(o.mut))o.mut.forEach((m,t)=>U.mute[t]=m?1:0);const now=performance.now();if(now-LVT<60)return;LVT=now;
  const pk=o.pk||[];LIVE.vu.forEach((i,t)=>{const v=+pk[t]||0,db=v>0?Math.max(0,Math.min(1,(20*Math.log10(v)+48)/48)):0;i.style.height=(db*100).toFixed(0)+"%";i.style.background=db>.92?"#FF4D5E":db>.78?"var(--wO,#f90)":"var(--cy,#8DF3FF)"});
  if(now-(LIVE.lp||0)>500){LIVE.lp=now;livePaint()}}
 // ===== PERF page in tabs: MIXER · DELAY/REVERB · MANETTE · TWISTER (no more 3 metres of scrolling)
